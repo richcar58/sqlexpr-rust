@@ -1,0 +1,246 @@
+(* ========================================================================== *)
+(* SQL Expression Parser - Extended BNF Grammar                              *)
+(* Grammar-Level Boolean Restriction Implementation                          *)
+(* ========================================================================== *)
+(*                                                                            *)
+(* This grammar enforces that all top-level expressions evaluate to boolean  *)
+(* values. Arithmetic and value expressions are only allowed as operands to  *)
+(* relational operators.                                                      *)
+(*                                                                            *)
+(* Key Design Principles:                                                    *)
+(* 1. Dual hierarchy: Boolean expressions (top) vs Value expressions (ops)   *)
+(* 2. Grammar-level type safety: Non-boolean exprs rejected at parse time    *)
+(* 3. Variables can appear in both contexts (runtime type checking)          *)
+(* ========================================================================== *)
+
+(* ========================================================================== *)
+(* BOOLEAN EXPRESSION HIERARCHY (Top Level - Always evaluates to boolean)    *)
+(* ========================================================================== *)
+
+(* Entry point - must be a boolean expression *)
+BooleanExpression = BooleanOrExpression ;
+
+(* OR has lower precedence - binds least tightly *)
+BooleanOrExpression = BooleanAndExpression { "OR" BooleanAndExpression } ;
+
+(* AND has higher precedence than OR *)
+BooleanAndExpression = BooleanTerm { "AND" BooleanTerm } ;
+
+(* Boolean terms - base elements of boolean expressions *)
+BooleanTerm = "NOT" BooleanTerm
+            | "(" BooleanExpression ")"
+            | BooleanLiteral
+            | Variable
+            | RelationalExpression ;
+
+(* Boolean literal values *)
+BooleanLiteral = "TRUE" | "FALSE" ;
+
+(* ========================================================================== *)
+(* RELATIONAL EXPRESSIONS (Produce boolean results from value comparisons)   *)
+(* ========================================================================== *)
+
+RelationalExpression = EqualityExpression
+                     | ComparisonExpression
+                     | IsNullExpression ;
+
+(* Equality operators: = and <> (also !=) *)
+EqualityExpression = ValueExpression EqualityOp ValueExpression ;
+
+EqualityOp = "=" | "<>" | "!=" ;
+
+(* Comparison operators *)
+ComparisonExpression = ValueExpression ComparisonOp ;
+
+ComparisonOp = SimpleComparison ValueExpression
+             | "LIKE" StringLiteral [ "ESCAPE" StringLiteral ]
+             | "NOT" "LIKE" StringLiteral [ "ESCAPE" StringLiteral ]
+             | "BETWEEN" ValueExpression "AND" ValueExpression
+             | "NOT" "BETWEEN" ValueExpression "AND" ValueExpression
+             | "IN" "(" StringList ")"
+             | "NOT" "IN" "(" StringList ")" ;
+
+SimpleComparison = ">" | ">=" | "<" | "<=" ;
+
+(* IS NULL and IS NOT NULL *)
+IsNullExpression = ValueExpression "IS" [ "NOT" ] "NULL" ;
+
+(* String list for IN operator *)
+StringList = StringLiteral { "," StringLiteral } ;
+
+(* ========================================================================== *)
+(* VALUE EXPRESSION HIERARCHY (Operands only - Evaluates to numeric/string)  *)
+(* ========================================================================== *)
+
+(* Value expressions - can only appear as operands to relational operators *)
+ValueExpression = AddExpression ;
+
+(* Addition and subtraction - lowest precedence in arithmetic *)
+AddExpression = MultExpression { ( "+" | "-" ) MultExpression } ;
+
+(* Multiplication, division, modulo - higher precedence *)
+MultExpression = UnaryValueExpression { ( "*" | "/" | "%" ) UnaryValueExpression } ;
+
+(* Unary operators for values *)
+UnaryValueExpression = "+" UnaryValueExpression
+                     | "-" UnaryValueExpression
+                     | ValuePrimary ;
+
+(* Primary value expressions *)
+ValuePrimary = ValueLiteral
+             | Variable
+             | "(" ValueExpression ")" ;
+
+(* Value literals - numeric and string types *)
+ValueLiteral = DecimalLiteral
+             | HexLiteral
+             | OctalLiteral
+             | FloatingPointLiteral
+             | StringLiteral
+             | "NULL"
+             | "TRUE"    (* Can be used as string values in comparisons *)
+             | "FALSE" ; (* Can be used as string values in comparisons *)
+
+(* ========================================================================== *)
+(* SHARED ELEMENTS                                                            *)
+(* ========================================================================== *)
+
+(* Variables - can appear in both boolean and value contexts *)
+Variable = Identifier ;
+
+(* ========================================================================== *)
+(* LEXICAL ELEMENTS (Tokens)                                                 *)
+(* ========================================================================== *)
+
+(* Identifiers - variable names *)
+Identifier = ( Letter | "_" | "$" ) { Letter | Digit | "_" | "$" } ;
+
+(* String literals with SQL-style escaping *)
+StringLiteral = "'" { Character | "''" } "'" ;
+
+(* Decimal literals *)
+DecimalLiteral = Digit { Digit } [ "l" | "L" ] ;
+
+(* Hexadecimal literals *)
+HexLiteral = "0" ( "x" | "X" ) HexDigit { HexDigit } ;
+
+(* Octal literals *)
+OctalLiteral = "0" OctalDigit { OctalDigit } ;
+
+(* Floating point literals *)
+FloatingPointLiteral = Digit { Digit } "." { Digit } [ Exponent ]
+                     | Digit { Digit } Exponent
+                     | "." Digit { Digit } [ Exponent ] ;
+
+Exponent = ( "e" | "E" ) [ "+" | "-" ] Digit { Digit } ;
+
+(* Character classes *)
+Letter = "a" | "b" | "c" | "d" | "e" | "f" | "g" | "h" | "i" | "j" | "k" | "l" | "m"
+       | "n" | "o" | "p" | "q" | "r" | "s" | "t" | "u" | "v" | "w" | "x" | "y" | "z"
+       | "A" | "B" | "C" | "D" | "E" | "F" | "G" | "H" | "I" | "J" | "K" | "L" | "M"
+       | "N" | "O" | "P" | "Q" | "R" | "S" | "T" | "U" | "V" | "W" | "X" | "Y" | "Z" ;
+
+Digit = "0" | "1" | "2" | "3" | "4" | "5" | "6" | "7" | "8" | "9" ;
+
+HexDigit = Digit | "a" | "b" | "c" | "d" | "e" | "f"
+                 | "A" | "B" | "C" | "D" | "E" | "F" ;
+
+OctalDigit = "0" | "1" | "2" | "3" | "4" | "5" | "6" | "7" ;
+
+Character = ? any character except single quote ? ;
+
+(* ========================================================================== *)
+(* WHITESPACE AND COMMENTS                                                    *)
+(* ========================================================================== *)
+
+(* Line comments *)
+LineComment = "--" { ? any character except newline ? } "\n" ;
+
+(* Block comments *)
+BlockComment = "/*" { ? any character ? } "*/" ;
+
+(* Whitespace is ignored between tokens *)
+Whitespace = " " | "\t" | "\n" | "\r" ;
+
+(* ========================================================================== *)
+(* KEYWORDS (Case-insensitive)                                                *)
+(* ========================================================================== *)
+
+(* Reserved keywords - case insensitive in lexer *)
+(* AND, OR, NOT, BETWEEN, LIKE, ESCAPE, IN, IS, TRUE, FALSE, NULL *)
+
+(* ========================================================================== *)
+(* GRAMMAR EXAMPLES                                                           *)
+(* ========================================================================== *)
+
+(* ACCEPTED EXPRESSIONS (Boolean):
+ *   x > 5
+ *   name = 'John' AND age >= 18
+ *   price BETWEEN 10 AND 100
+ *   status IN ('active', 'pending')
+ *   email LIKE '%@example.com'
+ *   value IS NOT NULL
+ *   (a + b) > (c - d)          - arithmetic allowed in comparison context
+ *   TRUE
+ *   active                     - variable (could be boolean at runtime)
+ *   NOT (x = 5 OR y = 10)
+ *
+ * REJECTED EXPRESSIONS (Non-boolean):
+ *   42                         - standalone literal
+ *   1 + 2                      - standalone arithmetic
+ *   (a * b)                    - parenthesized arithmetic
+ *   'hello'                    - standalone string
+ *   x + y                      - arithmetic without comparison
+ *
+ * The grammar enforces at parse time that these non-boolean expressions
+ * cannot be constructed, providing compile-time type safety.
+ *)
+
+(* ========================================================================== *)
+(* OPERATOR PRECEDENCE (Highest to Lowest)                                   *)
+(* ========================================================================== *)
+
+(* 1. Primary expressions: literals, variables, parentheses
+ * 2. Unary operators: + - (value context), NOT (boolean context)
+ * 3. Multiplicative: * / %
+ * 4. Additive: + -
+ * 5. Relational: > >= < <= LIKE BETWEEN IN IS
+ * 6. Equality: = <> !=
+ * 7. Logical AND
+ * 8. Logical OR
+ *)
+
+(* ========================================================================== *)
+(* AST STRUCTURE MAPPING                                                      *)
+(* ========================================================================== *)
+
+(* Boolean Expression Hierarchy:
+ *   BooleanExpression (root)
+ *     ├── BooleanOrExpression (OR operations)
+ *     ├── BooleanAndExpression (AND operations)
+ *     ├── Not (boolean negation)
+ *     ├── Relational (comparisons)
+ *     ├── BooleanLiteral (TRUE/FALSE)
+ *     ├── Variable (runtime boolean)
+ *     └── Parenthesized (grouped boolean expr)
+ *
+ * Value Expression Hierarchy:
+ *   ValueExpression (operands only)
+ *     ├── AddExpression (+ -)
+ *     ├── MultExpression (* / %)
+ *     ├── UnaryValueExpression (+ - unary)
+ *     ├── Literal (numbers, strings, NULL)
+ *     ├── Variable (runtime value)
+ *     └── Parenthesized (grouped value expr)
+ *
+ * Relational Expression (bridges both hierarchies):
+ *   RelationalExpression
+ *     ├── Equality (=, <>, !=)
+ *     ├── Comparison (>, >=, <, <=, LIKE, BETWEEN, IN)
+ *     ├── IsNull (IS NULL)
+ *     └── IsNotNull (IS NOT NULL)
+ *)
+
+(* ========================================================================== *)
+(* END OF GRAMMAR                                                             *)
+(* ========================================================================== *)
