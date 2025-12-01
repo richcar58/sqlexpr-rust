@@ -46,7 +46,6 @@ pub enum Token {
     Identifier(String),
     StringLiteral(String),
     IntegerLiteral(i64),
-    LongLiteral(i64),
     FloatLiteral(f64),
 
     // End of input
@@ -84,7 +83,6 @@ impl fmt::Display for Token {
             Token::Identifier(s) => write!(f, "identifier '{}'", s),
             Token::StringLiteral(s) => write!(f, "string '{}'", s),
             Token::IntegerLiteral(n) => write!(f, "integer {}", n),
-            Token::LongLiteral(n) => write!(f, "long {}L", n),
             Token::FloatLiteral(n) => write!(f, "float {}", n),
             Token::Eof => write!(f, "end of input"),
         }
@@ -293,12 +291,12 @@ impl Lexer {
             }
         }
 
-        // Check for long suffix (l or L)
+        // Check for long suffix (l or L) - treat as regular integer
         if matches!(self.current_char, Some('l') | Some('L')) && !is_float {
             self.advance();
             let value = num_str.parse::<i64>()
-                .map_err(|e| format!("Invalid long literal: {}", e))?;
-            return Ok(Token::LongLiteral(value));
+                .map_err(|e| format!("Invalid integer literal: {}", e))?;
+            return Ok(Token::IntegerLiteral(value));
         }
 
         // Parse as float or integer
@@ -559,7 +557,7 @@ mod tests {
         assert_eq!(lexer.next_token().unwrap(), Token::IntegerLiteral(63)); // 077 octal
         assert_eq!(lexer.next_token().unwrap(), Token::FloatLiteral(3.14));
         assert!(matches!(lexer.next_token().unwrap(), Token::FloatLiteral(_)));
-        assert_eq!(lexer.next_token().unwrap(), Token::LongLiteral(100));
+        assert_eq!(lexer.next_token().unwrap(), Token::IntegerLiteral(100)); // 100L treated as integer
     }
 
     #[test]

@@ -694,6 +694,7 @@ fn test_in_single_integer() {
 
 #[test]
 fn test_not_in_with_long_literals() {
+    // Long literals (with L suffix) are now treated as regular integers
     let result = parse("big_number NOT IN (1000000L, 2000000L, 3000000L)");
     assert!(result.is_ok());
 }
@@ -701,6 +702,12 @@ fn test_not_in_with_long_literals() {
 #[test]
 fn test_in_with_octal_values() {
     let result = parse("permissions IN (0644, 0755, 0777)");
+    assert!(result.is_ok());
+}
+
+#[test]
+fn test_in_with_mixed_values() {
+    let result = parse("v IN (0644, 0x755, 777, 3000000L, 3.14e2, 2.628)");
     assert!(result.is_ok());
 }
 
@@ -840,12 +847,14 @@ fn test_integer_literal() {
 
 #[test]
 fn test_long_literal() {
+    // Long suffix (L) is now treated as regular integer
     let result = parse("x = 42L");
     assert!(result.is_ok());
 }
 
 #[test]
 fn test_long_literal_lowercase() {
+    // Long suffix (l) is now treated as regular integer
     let result = parse("x = 42l");
     assert!(result.is_ok());
 }

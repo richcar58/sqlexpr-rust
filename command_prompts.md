@@ -11,3 +11,9 @@
 4. Add more tests for LIKE and NOT LIKE operators with embedded multi-character placeholders, with and without ESCAPE clauses.  
 5. Add more tests for LIKE and NOT LIKE operators with zero or more leading, trailing and/or embedded single character placeholders.
 6. Add more tests for IN and NOT IN operators with numeric value sets.
+
+## Simplify Integer Tokeniation and Parsing
+
+1. In lexer.rs, convert literal values assigned the LongLiteral(i64) lexeme to be assign the IntegerLiteral(i64) lexeme.
+2. Replace all references to LongLiteral(i64) with references to IntegerLiteral(i64) parser.rs and ast.rs
+3. Remove the LongLiteral(i64) lexeme from lexer.rs.

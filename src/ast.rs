@@ -138,11 +138,8 @@ pub enum ValueExpr {
 /// Literal values
 #[derive(Debug, Clone, PartialEq)]
 pub enum ValueLiteral {
-    /// Integer literal (decimal, hex, or octal)
+    /// Integer literal (decimal, hex, octal, or with L/l suffix)
     Integer(i64),
-
-    /// Long integer literal (ends with 'l' or 'L')
-    Long(i64),
 
     /// Floating point literal
     Float(f64),
@@ -266,7 +263,6 @@ impl fmt::Display for ValueLiteral {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
             ValueLiteral::Integer(n) => write!(f, "{}", n),
-            ValueLiteral::Long(n) => write!(f, "{}L", n),
             ValueLiteral::Float(n) => write!(f, "{}", n),
             ValueLiteral::String(s) => write!(f, "'{}'", s),
             ValueLiteral::Null => write!(f, "NULL"),

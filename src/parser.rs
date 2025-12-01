@@ -429,10 +429,6 @@ impl Parser {
                 self.advance();
                 Ok(ValueLiteral::Integer(if is_negative { -n } else { n }))
             }
-            Token::LongLiteral(n) => {
-                self.advance();
-                Ok(ValueLiteral::Long(if is_negative { -n } else { n }))
-            }
             Token::FloatLiteral(f) => {
                 self.advance();
                 Ok(ValueLiteral::Float(if is_negative { -f } else { f }))
@@ -557,10 +553,6 @@ impl Parser {
             Token::IntegerLiteral(n) => {
                 self.advance();
                 Ok(ValueExpr::Literal(ValueLiteral::Integer(n)))
-            }
-            Token::LongLiteral(n) => {
-                self.advance();
-                Ok(ValueExpr::Literal(ValueLiteral::Long(n)))
             }
             Token::FloatLiteral(n) => {
                 self.advance();
