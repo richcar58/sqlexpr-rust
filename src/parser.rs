@@ -9,6 +9,8 @@ use crate::lexer::{Lexer, Token};
 pub struct Parser {
     tokens: Vec<Token>,
     position: usize,
+    pretty_print: bool,
+    input: String,
 }
 
 #[derive(Debug)]
@@ -31,9 +33,17 @@ impl Parser {
         let mut lexer = Lexer::new(input);
         let tokens = lexer.tokenize()
             .map_err(|e| ParseError { message: e })?;
+
+        // Check SQLEXPR_PRETTY environment variable
+        let pretty_print = std::env::var("SQLEXPR_PRETTY")
+            .map(|v| v.to_lowercase() == "true")
+            .unwrap_or(false);
+
         Ok(Parser {
             tokens,
             position: 0,
+            pretty_print,
+            input: input.to_string(),
         })
     }
 
@@ -74,7 +84,131 @@ impl Parser {
                 message: format!("Unexpected token after expression: {}", self.current_token()),
             });
         }
+
+        // Pretty print if enabled
+        if self.pretty_print {
+            self.print_ast(&expr);
+        }
+
         Ok(expr)
+    }
+
+    /// Pretty print the AST with indentation
+    fn print_ast(&self, expr: &BooleanExpr) {
+        println!("Input: {}", self.input);
+        println!("AST:");
+        self.print_boolean_expr(expr, 0);
+        println!();
+    }
+
+    fn print_boolean_expr(&self, expr: &BooleanExpr, indent: usize) {
+        let prefix = " ".repeat(indent);
+        match expr {
+            BooleanExpr::Or(left, right) => {
+                println!("{}Or", prefix);
+                self.print_boolean_expr(left, indent + 3);
+                self.print_boolean_expr(right, indent + 3);
+            }
+            BooleanExpr::And(left, right) => {
+                println!("{}And", prefix);
+                self.print_boolean_expr(left, indent + 3);
+                self.print_boolean_expr(right, indent + 3);
+            }
+            BooleanExpr::Not(inner) => {
+                println!("{}Not", prefix);
+                self.print_boolean_expr(inner, indent + 3);
+            }
+            BooleanExpr::Literal(b) => {
+                println!("{}BooleanLiteral: {}", prefix, b);
+            }
+            BooleanExpr::Variable(name) => {
+                println!("{}Variable: {}", prefix, name);
+            }
+            BooleanExpr::Relational(rel) => {
+                println!("{}Relational", prefix);
+                self.print_relational_expr(rel, indent + 3);
+            }
+        }
+    }
+
+    fn print_relational_expr(&self, expr: &RelationalExpr, indent: usize) {
+        let prefix = " ".repeat(indent);
+        match expr {
+            RelationalExpr::Equality { left, op, right } => {
+                println!("{}Equality: {:?}", prefix, op);
+                self.print_value_expr(left, indent + 3);
+                self.print_value_expr(right, indent + 3);
+            }
+            RelationalExpr::Comparison { left, op, right } => {
+                println!("{}Comparison: {:?}", prefix, op);
+                self.print_value_expr(left, indent + 3);
+                self.print_value_expr(right, indent + 3);
+            }
+            RelationalExpr::Like { expr, pattern, escape, negated } => {
+                println!("{}Like: negated={}, pattern='{}', escape={:?}",
+                    prefix, negated, pattern, escape);
+                self.print_value_expr(expr, indent + 3);
+            }
+            RelationalExpr::Between { expr, lower, upper, negated } => {
+                println!("{}Between: negated={}", prefix, negated);
+                self.print_value_expr(expr, indent + 3);
+                self.print_value_expr(lower, indent + 3);
+                self.print_value_expr(upper, indent + 3);
+            }
+            RelationalExpr::In { expr, values, negated } => {
+                println!("{}In: negated={}, values={:?}", prefix, negated, values);
+                self.print_value_expr(expr, indent + 3);
+            }
+            RelationalExpr::IsNull { expr, negated } => {
+                println!("{}IsNull: negated={}", prefix, negated);
+                self.print_value_expr(expr, indent + 3);
+            }
+        }
+    }
+
+    fn print_value_expr(&self, expr: &ValueExpr, indent: usize) {
+        let prefix = " ".repeat(indent);
+        match expr {
+            ValueExpr::Add(left, right) => {
+                println!("{}Add", prefix);
+                self.print_value_expr(left, indent + 3);
+                self.print_value_expr(right, indent + 3);
+            }
+            ValueExpr::Subtract(left, right) => {
+                println!("{}Subtract", prefix);
+                self.print_value_expr(left, indent + 3);
+                self.print_value_expr(right, indent + 3);
+            }
+            ValueExpr::Multiply(left, right) => {
+                println!("{}Multiply", prefix);
+                self.print_value_expr(left, indent + 3);
+                self.print_value_expr(right, indent + 3);
+            }
+            ValueExpr::Divide(left, right) => {
+                println!("{}Divide", prefix);
+                self.print_value_expr(left, indent + 3);
+                self.print_value_expr(right, indent + 3);
+            }
+            ValueExpr::Modulo(left, right) => {
+                println!("{}Modulo", prefix);
+                self.print_value_expr(left, indent + 3);
+                self.print_value_expr(right, indent + 3);
+            }
+            ValueExpr::UnaryPlus(inner) => {
+                println!("{}UnaryPlus", prefix);
+                self.print_value_expr(inner, indent + 3);
+            }
+            ValueExpr::UnaryMinus(inner) => {
+                println!("{}UnaryMinus", prefix);
+                self.print_value_expr(inner, indent + 3);
+            }
+            ValueExpr::Literal(lit) => {
+                println!("{}Literal: {:?}", prefix, lit);
+            }
+            ValueExpr::Variable(name) => {
+                println!("{}Variable: {}", prefix, name);
+            }
+        }
     }
 
     // ========================================================================

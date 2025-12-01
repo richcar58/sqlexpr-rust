@@ -139,6 +139,37 @@ match expr {
 }
 ```
 
+### Pretty Printing AST (Debug Feature)
+```bash
+# Enable pretty printing by setting environment variable
+export SQLEXPR_PRETTY=true
+
+# Run your parser - it will automatically print AST structure
+cargo run --example your_program
+```
+
+**Example output:**
+```
+Input: x > 5 AND y < 10
+AST:
+And
+   Relational
+      Comparison: GreaterThan
+         Variable: x
+         Literal: Integer(5)
+   Relational
+      Comparison: LessThan
+         Variable: y
+         Literal: Integer(10)
+```
+
+**Features:**
+- Activated via `SQLEXPR_PRETTY=true` environment variable (case insensitive)
+- Prints original input string
+- Shows complete AST structure with proper indentation (3 spaces per level)
+- Displays node types and their contents
+- Useful for debugging and understanding parser behavior
+
 ## Test Coverage
 
 The test suite (`tests/parser_tests.rs`) includes 95 comprehensive tests covering:
