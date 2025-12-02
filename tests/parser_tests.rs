@@ -323,6 +323,24 @@ fn test_string_comparison_with_numbers() {
     assert!(result.is_ok());
 }
 
+#[test]
+fn test_precedence_no_parens() {
+    let result = parse("2 + 3 * 4 = 14");
+    if let Err(e) = &result {
+        eprintln!("Parse error: {}", e);
+    }
+    assert!(result.is_ok());
+}
+
+#[test]
+fn test_precedence_with_parens() {
+    let result = parse("(2 + 3) * 4 = 20");
+    if let Err(e) = &result {
+        eprintln!("Parse error: {}", e);
+    }
+    assert!(result.is_ok());
+}
+
 // ============================================================================
 // LIKE OPERATOR
 // ============================================================================
@@ -1355,8 +1373,8 @@ fn test_complex_real_world_3() {
 fn test_reject_standalone_literal() {
     // Grammar should reject non-boolean top-level expressions
     let result = parse("42");
-    if let Err(e) = &result {
-        eprintln!("Parse error: {}", e);
+    if let Ok(r) = &result {
+        eprintln!("Expected error but found success: {}", r);
     }
     assert!(result.is_err());
 }
@@ -1364,8 +1382,8 @@ fn test_reject_standalone_literal() {
 #[test]
 fn test_reject_standalone_arithmetic() {
     let result = parse("1 + 2");
-    if let Err(e) = &result {
-        eprintln!("Parse error: {}", e);
+    if let Ok(r) = &result {
+        eprintln!("Expected error but found success: {}", r);
     }
     assert!(result.is_err());
 }
@@ -1373,8 +1391,8 @@ fn test_reject_standalone_arithmetic() {
 #[test]
 fn test_reject_standalone_string() {
     let result = parse("'hello'");
-    if let Err(e) = &result {
-        eprintln!("Parse error: {}", e);
+    if let Ok(r) = &result {
+        eprintln!("Expected error but found success: {}", r);
     }
     assert!(result.is_err());
 }
@@ -1382,8 +1400,8 @@ fn test_reject_standalone_string() {
 #[test]
 fn test_reject_parenthesized_arithmetic() {
     let result = parse("(a * b)");
-    if let Err(e) = &result {
-        eprintln!("Parse error: {}", e);
+    if let Ok(r) = &result {
+        eprintln!("Expected error but found success: {}", r);
     }
     assert!(result.is_err());
 }
@@ -1391,8 +1409,8 @@ fn test_reject_parenthesized_arithmetic() {
 #[test]
 fn test_reject_unterminated_string() {
     let result = parse("x = 'unterminated");
-    if let Err(e) = &result {
-        eprintln!("Parse error: {}", e);
+    if let Ok(r) = &result {
+        eprintln!("Expected error but found success: {}", r);
     }
     assert!(result.is_err());
 }
@@ -1400,8 +1418,8 @@ fn test_reject_unterminated_string() {
 #[test]
 fn test_reject_unterminated_block_comment() {
     let result = parse("x > 5 /* unterminated comment");
-    if let Err(e) = &result {
-        eprintln!("Parse error: {}", e);
+    if let Ok(r) = &result {
+        eprintln!("Expected error but found success: {}", r);
     }
     assert!(result.is_err());
 }
@@ -1409,8 +1427,8 @@ fn test_reject_unterminated_block_comment() {
 #[test]
 fn test_reject_invalid_operator() {
     let result = parse("x === 5");
-    if let Err(e) = &result {
-        eprintln!("Parse error: {}", e);
+    if let Ok(r) = &result {
+        eprintln!("Expected error but found success: {}", r);
     }
     assert!(result.is_err());
 }
@@ -1418,8 +1436,8 @@ fn test_reject_invalid_operator() {
 #[test]
 fn test_reject_missing_operand() {
     let result = parse("x >");
-    if let Err(e) = &result {
-        eprintln!("Parse error: {}", e);
+    if let Ok(r) = &result {
+        eprintln!("Expected error but found success: {}", r);
     }
     assert!(result.is_err());
 }

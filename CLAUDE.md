@@ -190,7 +190,7 @@ This makes it easy to identify exactly where and what caused the error. All erro
 
 ## Test Coverage
 
-The test suite (`tests/parser_tests.rs`) includes 153 comprehensive tests covering:
+The test suite (`tests/parser_tests.rs`) includes 155 comprehensive tests covering:
 - All boolean operators (AND, OR, NOT)
 - All comparison operators
 - LIKE/NOT LIKE with and without ESCAPE
@@ -205,9 +205,9 @@ The test suite (`tests/parser_tests.rs`) includes 153 comprehensive tests coveri
 
 ### Enhanced Test Error Messages
 
-All 153 integration tests have been simplified with improved error handling:
+All 155 integration tests have been simplified with improved error handling:
 
-**Current pattern:**
+**Pattern for POSITIVE tests** (147 tests - should succeed):
 ```rust
 let result = parse("some SQL expression");
 if let Err(e) = &result {
@@ -216,13 +216,25 @@ if let Err(e) = &result {
 assert!(result.is_ok(), "Expected <description>");
 ```
 
-**Changes made:**
-1. All tests print detailed parse errors to stderr before the assertion
-2. Descriptive messages moved from `panic!()` calls to `assert!()` second parameter
-3. Removed all `match` statements that only verified AST structure without further testing
-4. Removed unused AST type imports
+**Pattern for NEGATIVE tests** (8 tests - should fail):
+```rust
+let result = parse("invalid expression");
+if let Ok(r) = &result {
+    eprintln!("Expected error but found success: {}", r);
+}
+assert!(result.is_err());
+```
 
-**Test output when a test fails:**
+**Changes made:**
+1. All positive tests print detailed parse errors to stderr if parsing fails
+2. All negative tests print the AST to stderr if parsing unexpectedly succeeds
+3. Descriptive messages moved from `panic!()` calls to `assert!()` second parameter
+4. Removed all `match` statements that only verified AST structure without further testing
+5. Removed unused AST type imports
+
+**Test output examples:**
+
+*Positive test failure:*
 ```
 Parse error: Parse error: Unterminated string literal near position 20 in:
   name LIKE '%test
@@ -233,10 +245,20 @@ assertion `left == right` failed: Expected LIKE expression
   right: true
 ```
 
+*Negative test failure (if parser incorrectly accepts invalid input):*
+```
+Expected error but found success: Literal(Integer(42))
+
+thread 'test_reject_standalone_literal' panicked at tests/parser_tests.rs:1379:5:
+assertion `left == right` failed
+  left: true
+  right: false
+```
+
 **Benefits:**
 - Cleaner, more concise test code
-- Error details appear in stderr before assertion failure
+- Error details or unexpected success appear in stderr before assertion
 - Descriptive assertion messages show what was expected
 - Standard assertion behavior preserved (works with all test frameworks)
-- Easier to debug without modifying code
+- Easier to debug both false positives and false negatives
 

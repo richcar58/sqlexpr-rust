@@ -38,3 +38,29 @@
 
     This assert! statement appears just before the match statement that contains the panic! call.  After copying the panic_message to the assert! call, remove the match containing the panic! call from the test function.
 
+4. Almost there. The negative tests in tests/parser_tests print an error message when an error is expected.  These tests need to be updated:
+
+    test_reject_standalone_literal
+    test_reject_standalone_arithmetic
+    test_reject_standalone_string
+    test_reject_parenthesized_arithmetic
+    test_reject_unterminated_string
+    test_reject_unterminated_block_comment
+    test_reject_invalid_operator
+    reject_missing_operand
+
+    In each of the above functions, this statement:
+
+    if let Err(e) = &result {
+        eprintln!("Parse error: {}", e);
+    }
+
+    should be replaced with this statement:
+
+     if let Ok(r) = &result {
+        eprintln!("Expected error but found success: {}", r);
+    }
+   
+
+
+
