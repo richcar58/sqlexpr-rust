@@ -25,4 +25,16 @@
 ## Improve Error Messages
 
 1. Append more debugging information to the errors returned using Err in lexer.rs  To each Err message append " near position {self.position} in:\n  {String::from_iter(&self.input)}".
+2. Change the error handling logic in each test case in tests/parser_tests.rs to remove the panic calls.  Instead, right after the line that assigns the result variable, this code should complete the test function:
+
+    if let Err(e) = &result {
+        eprintln!("Parse error: {}", e);
+    }
+    assert!(result.is_ok());
+
+3. Good, are are almost there.  In  each test case in tests/parser_tests.rs that has a call to panic!(panic_message), add the panic_message as a second parameter to the preceeding assert! statement:  
+
+    assert!(result.is_ok());
+
+    This assert! statement appears just before the match statement that contains the panic! call.  After copying the panic_message to the assert! call, remove the match containing the panic! call from the test function.
 
