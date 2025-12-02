@@ -91,7 +91,7 @@ The parser implements a strict type hierarchy enforced at the grammar level:
 - Numeric literals: decimal, hexadecimal (0x), octal (0), floating-point
 - Line comments: `--` to end of line
 - Block comments: `/* ... */`
-- Comprehensive error messages
+- Comprehensive error messages with position and input context
 
 ### Parser Strategy
 
@@ -170,9 +170,27 @@ And
 - Displays node types and their contents
 - Useful for debugging and understanding parser behavior
 
+## Error Messages
+
+All lexer errors include detailed context information to aid debugging:
+- **Position**: Character index where the error occurred
+- **Input**: Full input clause for context
+
+**Example error:**
+```
+Parse error: Unterminated string literal near position 12 in:
+  'hello world
+```
+
+This makes it easy to identify exactly where and what caused the error. All error types include this information:
+- Unterminated string literals
+- Unterminated block comments
+- Invalid numeric literals (integer, float, hex, octal)
+- Unexpected characters
+
 ## Test Coverage
 
-The test suite (`tests/parser_tests.rs`) includes 95 comprehensive tests covering:
+The test suite (`tests/parser_tests.rs`) includes 153 comprehensive tests covering:
 - All boolean operators (AND, OR, NOT)
 - All comparison operators
 - LIKE/NOT LIKE with and without ESCAPE
@@ -184,3 +202,8 @@ The test suite (`tests/parser_tests.rs`) includes 95 comprehensive tests coverin
 - Comments (line and block)
 - Complex nested expressions
 - Error cases (rejecting standalone arithmetic, etc.)
+
+### Enhanced Test Error Messages
+
+All 145 success-path tests now include detailed error information when they fail:
+

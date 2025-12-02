@@ -24,4 +24,5 @@
 
 ## Improve Error Messages
 
-1. Add a String field named "input" to the Parser data type.  Save the Parser::parse(input: &str) input parameter in the new input field. 
+1. Append more debugging information to the errors returned using Err in lexer.rs  To each Err message append " near position {self.position} in:\n  {String::from_iter(&self.input)}".
+

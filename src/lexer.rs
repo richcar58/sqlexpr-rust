@@ -106,6 +106,14 @@ impl Lexer {
         }
     }
 
+    /// Format error message with position and input context
+    fn format_error(&self, message: &str) -> String {
+        format!("{} near position {} in:\n  {}",
+            message,
+            self.position,
+            String::from_iter(&self.input))
+    }
+
     /// Advance to the next character
     fn advance(&mut self) {
         self.position += 1;
@@ -160,7 +168,7 @@ impl Lexer {
             self.advance();
         }
 
-        Err("Unterminated block comment".to_string())
+        Err(self.format_error("Unterminated block comment"))
     }
 
     /// Read an identifier or keyword
@@ -222,7 +230,7 @@ impl Lexer {
             }
         }
 
-        Err("Unterminated string literal".to_string())
+        Err(self.format_error("Unterminated string literal"))
     }
 
     /// Read a numeric literal (integer, long, hex, octal, or float)
@@ -295,18 +303,18 @@ impl Lexer {
         if matches!(self.current_char, Some('l') | Some('L')) && !is_float {
             self.advance();
             let value = num_str.parse::<i64>()
-                .map_err(|e| format!("Invalid integer literal: {}", e))?;
+                .map_err(|e| self.format_error(&format!("Invalid integer literal: {}", e)))?;
             return Ok(Token::IntegerLiteral(value));
         }
 
         // Parse as float or integer
         if is_float {
             let value = num_str.parse::<f64>()
-                .map_err(|e| format!("Invalid float literal: {}", e))?;
+                .map_err(|e| self.format_error(&format!("Invalid float literal: {}", e)))?;
             Ok(Token::FloatLiteral(value))
         } else {
             let value = num_str.parse::<i64>()
-                .map_err(|e| format!("Invalid integer literal: {}", e))?;
+                .map_err(|e| self.format_error(&format!("Invalid integer literal: {}", e)))?;
             Ok(Token::IntegerLiteral(value))
         }
     }
@@ -328,11 +336,11 @@ impl Lexer {
         }
 
         if hex_str.is_empty() {
-            return Err("Invalid hexadecimal literal: no digits after 0x".to_string());
+            return Err(self.format_error("Invalid hexadecimal literal: no digits after 0x"));
         }
 
         let value = i64::from_str_radix(&hex_str, 16)
-            .map_err(|e| format!("Invalid hexadecimal literal: {}", e))?;
+            .map_err(|e| self.format_error(&format!("Invalid hexadecimal literal: {}", e)))?;
         Ok(Token::IntegerLiteral(value))
     }
 
@@ -350,7 +358,7 @@ impl Lexer {
         }
 
         let value = i64::from_str_radix(&octal_str, 8)
-            .map_err(|e| format!("Invalid octal literal: {}", e))?;
+            .map_err(|e| self.format_error(&format!("Invalid octal literal: {}", e)))?;
         Ok(Token::IntegerLiteral(value))
     }
 
@@ -394,7 +402,7 @@ impl Lexer {
         }
 
         let value = num_str.parse::<f64>()
-            .map_err(|e| format!("Invalid float literal: {}", e))?;
+            .map_err(|e| self.format_error(&format!("Invalid float literal: {}", e)))?;
         Ok(Token::FloatLiteral(value))
     }
 
@@ -464,7 +472,7 @@ impl Lexer {
                         self.advance();
                         return Ok(Token::NotEqual);
                     }
-                    return Err(format!("Unexpected character: '{}'", ch));
+                    return Err(self.format_error(&format!("Unexpected character: '{}'", ch)));
                 }
                 '<' => {
                     self.advance();
@@ -494,7 +502,7 @@ impl Lexer {
                     if self.peek().map_or(false, |c| c.is_ascii_digit()) {
                         return self.read_float_starting_with_dot();
                     }
-                    return Err(format!("Unexpected character: '{}'", ch));
+                    return Err(self.format_error(&format!("Unexpected character: '{}'", ch)));
                 }
                 _ => {
                     // Identifiers and keywords
@@ -508,7 +516,7 @@ impl Lexer {
                         return self.read_number();
                     }
 
-                    return Err(format!("Unexpected character: '{}'", ch));
+                    return Err(self.format_error(&format!("Unexpected character: '{}'", ch)));
                 }
             }
         }
