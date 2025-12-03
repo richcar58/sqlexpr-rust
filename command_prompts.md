@@ -116,6 +116,11 @@ The algorithms and strategies used in the final implementation should be documen
 
 *Please generate a plan for the implementation of the Evaluator and how it will be tested and documented.*
 
+## Tweaks
+
+The fn test_error_in_operator_with_non_string and test_error_in_operator_with_non_numeric tests in evaluator.rs fail without a proper error message.  In both cases, the lefthand argument to the IN clause is a type that doesn't match the type of the vector elements.  A clear error message using EvalError::TypeError should be generated.  The problem may be in the Evaluator::eval_in() function's match statement, which does not distinguish between no match because the lefthand value is not in the vector and a type mismatch between the lefthand value and the vector elements.
+
+Since vectors and arrays in Rust must 
 
 
 

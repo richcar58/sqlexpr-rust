@@ -394,6 +394,24 @@ fn test_in_mixed_numeric_types() {
     assert_eq!(evaluate("x IN (1, 2, 5)", &bindings).unwrap(), true);
 }
 
+// Automatic numeric type coercion in IN operator (e.g., Integer to Float)
+#[test]
+fn test_error_in_operator_with_compatible_numeric_types() {
+    let mut map = HashMap::new();
+    map.insert("x".to_string(), RuntimeValue::Float(8.0));
+
+    assert_eq!(evaluate("x IN (6, 7, 8)", &map).unwrap(), true);
+}
+
+// Automatic numeric type coercion in IN operator (e.g., Integer to Float)
+#[test]
+fn test_error_in_operator_with_compatible_numeric_types_2() {
+    let mut map = HashMap::new();
+    map.insert("x".to_string(), RuntimeValue::Integer(8));
+
+    assert_eq!(evaluate("x IN (6.1, .2, 8.0)", &map).unwrap(), true);
+}
+
 // ============================================================================
 // IS NULL TESTS
 // ============================================================================
@@ -1111,6 +1129,40 @@ fn test_error_in_operator_with_non_string() {
         EvalError::TypeError { operation, expected, .. } => {
             assert_eq!(operation, "IN");
             assert_eq!(expected, "string");
+        }
+        _ => panic!("Expected TypeError"),
+    }
+}
+
+// String value cannot be used in numeric IN operator
+#[test]
+fn test_error_in_operator_with_non_numeric() {
+    let mut map = HashMap::new();
+    map.insert("x".to_string(), RuntimeValue::String("banana".to_string()));
+
+    let result = evaluate("x IN (6, 7, 8)", &map);
+    assert!(result.is_err());
+    match result.unwrap_err() {
+        EvalError::TypeError { operation, expected, .. } => {
+            assert_eq!(operation, "IN");
+            assert_eq!(expected, "integer");
+        }
+        _ => panic!("Expected TypeError"),
+    }
+}
+
+// Mixed numeric types (Integer and Float) are not allowed in IN operator list
+#[test]
+fn test_error_in_operator_with_mixed_numeric_types() {
+    let mut map = HashMap::new();
+    map.insert("x".to_string(), RuntimeValue::Integer(8));
+
+    let result = evaluate("x IN (6, 7.0, 8)", &map);
+    assert!(result.is_err());
+    match result.unwrap_err() {
+        EvalError::TypeError { operation, expected, .. } => {
+            assert_eq!(operation, "IN");
+            assert_eq!(expected, "integer");
         }
         _ => panic!("Expected TypeError"),
     }

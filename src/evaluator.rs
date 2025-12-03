@@ -459,6 +459,39 @@ impl<'a> Evaluator<'a> {
             });
         }
 
+        // First pass: check if all list values are of incompatible type with left value
+        // This helps us distinguish between "not found" and "type mismatch"
+        if !values.is_empty() {
+            let first_list_val = SubValue::from_literal(&values[0]);
+            let is_compatible = Self::are_types_compatible_for_in(&val, &first_list_val);
+
+             // If list is incompatible with left value, it's a type error
+            if !is_compatible {
+                return Err(EvalError::TypeError {
+                    operation: "IN".to_string(),
+                    expected: first_list_val.type_name(),
+                    actual: val.type_name(),
+                    context: "left operand type doesn't match list element types".to_string(),
+                });
+            }
+
+           // Check if all list values are same type as first
+            let all_same_type = values.iter().all(|lit| {
+                let list_val = SubValue::from_literal(lit);
+                Self::are_same_type(&first_list_val, &list_val)
+            });
+
+             // If list is incompatible with left value, it's a type error
+            if !all_same_type {
+                return Err(EvalError::TypeError {
+                    operation: "IN".to_string(),
+                    expected: first_list_val.type_name(),
+                    actual: val.type_name(),
+                    context: "match list contains elements of different types".to_string(),
+                });
+            }
+        }
+
         let mut found = false;
         for lit_val in values {
             let list_val = SubValue::from_literal(lit_val);
@@ -472,7 +505,7 @@ impl<'a> Evaluator<'a> {
                 (SubValue::String(a), SubValue::String(b)) => a == b,
                 (SubValue::Boolean(a), SubValue::Boolean(b)) => a == b,
                 (SubValue::Null, SubValue::Null) => true,
-                _ => false,  // Type mismatch means no match
+                _ => false,  // Means no match since type mismatches are caused above
             };
 
             if matches {
@@ -769,6 +802,36 @@ impl<'a> Evaluator<'a> {
                 actual: val.type_name(),
                 context: "operand".to_string(),
             }),
+        }
+    }
+
+    /// Check if two types are compatible for IN operator
+    /// (allows int/float mixing, but not string/numeric, etc.)
+    fn are_types_compatible_for_in(left: &SubValue, right: &SubValue) -> bool {
+        match (left, right) {
+            // Exact matches
+            (SubValue::Integer(_), SubValue::Integer(_)) => true,
+            (SubValue::Float(_), SubValue::Float(_)) => true,
+            (SubValue::String(_), SubValue::String(_)) => true,
+            (SubValue::Boolean(_), SubValue::Boolean(_)) => true,
+            (SubValue::Null, SubValue::Null) => true,
+            // Numeric type mixing is allowed
+            (SubValue::Integer(_), SubValue::Float(_)) => true,
+            (SubValue::Float(_), SubValue::Integer(_)) => true,
+            // Everything else is incompatible
+            _ => false,
+        }
+    }
+
+    /// Check if two values have the same type
+    fn are_same_type(a: &SubValue, b: &SubValue) -> bool {
+        match (a, b) {
+            (SubValue::Integer(_), SubValue::Integer(_)) => true,
+            (SubValue::Float(_), SubValue::Float(_)) => true,
+            (SubValue::String(_), SubValue::String(_)) => true,
+            (SubValue::Boolean(_), SubValue::Boolean(_)) => true,
+            (SubValue::Null, SubValue::Null) => true,
+            _ => false,
         }
     }
 
