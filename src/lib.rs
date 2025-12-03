@@ -10,6 +10,7 @@
 pub mod ast;
 pub mod lexer;
 pub mod parser;
+pub mod evaluator;
 
 // Re-export main types for convenient access
 pub use ast::{
@@ -17,6 +18,7 @@ pub use ast::{
     EqualityOp, ComparisonOp,
 };
 pub use parser::{parse, ParseError};
+pub use evaluator::{evaluate, RuntimeValue, EvalError};
 
 #[cfg(test)]
 mod tests {

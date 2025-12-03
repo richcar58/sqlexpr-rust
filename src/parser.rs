@@ -71,7 +71,7 @@ impl Parser {
             Ok(())
         } else {
             Err(ParseError {
-                message: format!("Expected {}, got {}", expected, self.current_token()),
+                message: format!("Expected {}, got {} near position {} in:\n  {}", expected, self.current_token(), self.position, self.input),
             })
         }
     }
@@ -81,7 +81,7 @@ impl Parser {
         let expr = self.parse_boolean_expression()?;
         if self.current_token() != &Token::Eof {
             return Err(ParseError {
-                message: format!("Unexpected token after expression: {}", self.current_token()),
+                message: format!("Unexpected token '{}' near position {} in:\n  {}", self.current_token(), self.position, self.input),
             });
         }
 
@@ -305,7 +305,7 @@ impl Parser {
             Token::Identifier(_) => {
                 // Could be a variable or start of relational expression
                 // We need to look ahead to determine which
-                if self.is_relational_operator_ahead() {
+                if self.is_relational_operator_ahead() || self.is_arithmetic_operator_ahead() {
                     let rel = self.parse_relational_expression()?;
                     Ok(BooleanExpr::Relational(rel))
                 } else {
@@ -338,6 +338,15 @@ impl Parser {
             Token::LessThan | Token::LessOrEqual |
             Token::Like | Token::Between | Token::In | Token::Is |
             Token::Not  // For NOT LIKE, NOT BETWEEN, NOT IN
+        )
+    }
+
+    /// Check if an arithmetic operator follows
+    fn is_arithmetic_operator_ahead(&self) -> bool {
+        // Look ahead to see if there's an arithmetic operator
+        let next = self.peek_token();
+        matches!(next,
+            Token::Plus | Token::Minus | Token::Star | Token::Slash | Token::Percent
         )
     }
 
@@ -463,7 +472,7 @@ impl Parser {
                         })
                     }
                     _ => Err(ParseError {
-                        message: format!("Expected LIKE, BETWEEN, or IN after NOT, got {}", self.current_token()),
+                        message: format!("Expected LIKE, BETWEEN, or IN after NOT, got {} near position {} in:\n  {}", self.current_token(), self.position, self.input),
                     }),
                 }
             }
@@ -503,7 +512,7 @@ impl Parser {
                 })
             }
             _ => Err(ParseError {
-                message: format!("Expected relational operator, got {}", self.current_token()),
+                message: format!("Expected relational operator, got {} near position {} in:\n  {}", self.current_token(), self.position, self.input),
             }),
         }
     }
@@ -517,7 +526,7 @@ impl Parser {
                 Ok(s)
             }
             _ => Err(ParseError {
-                message: format!("Expected string literal, got {}", self.current_token()),
+                message: format!("Expected string literal, got {} near position {} in:\n  {}", self.current_token(), self.position, self.input),
             }),
         }
     }
@@ -553,7 +562,7 @@ impl Parser {
             Token::StringLiteral(s) => {
                 if is_negative {
                     return Err(ParseError {
-                        message: "Cannot apply unary minus to string literal".to_string(),
+                        message: format!("Cannot apply unary minus to string literal near position {} in:\n  {}", self.position, self.input),
                     });
                 }
                 self.advance();
@@ -570,7 +579,7 @@ impl Parser {
             Token::Null => {
                 if is_negative {
                     return Err(ParseError {
-                        message: "Cannot apply unary minus to NULL".to_string(),
+                        message: format!("Cannot apply unary minus to NULL near position {} in:\n  {}", self.position, self.input),
                     });
                 }
                 self.advance();
@@ -579,7 +588,7 @@ impl Parser {
             Token::True => {
                 if is_negative {
                     return Err(ParseError {
-                        message: "Cannot apply unary minus to boolean".to_string(),
+                        message: format!("Cannot apply unary minus to boolean near position {} in:\n  {}", self.position, self.input),
                     });
                 }
                 self.advance();
@@ -588,14 +597,14 @@ impl Parser {
             Token::False => {
                 if is_negative {
                     return Err(ParseError {
-                        message: "Cannot apply unary minus to boolean".to_string(),
+                        message: format!("Cannot apply unary minus to boolean near position {} in:\n  {}", self.position, self.input),
                     });
                 }
                 self.advance();
                 Ok(ValueLiteral::Boolean(false))
             }
             _ => Err(ParseError {
-                message: format!("Expected literal value, got {}", self.current_token()),
+                message: format!("Expected literal value, got {} near position {} in:\n  {}", self.current_token(), self.position, self.input),
             }),
         }
     }
