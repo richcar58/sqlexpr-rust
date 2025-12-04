@@ -27,6 +27,8 @@ There are two Java SqlExpr parser/evaluator implementations that accept basicall
 - **Case-insensitive keywords**: `AND`, `and`, `And` all work
 - **Detailed error messages**: Parse errors include position and context
 
+This parser implements a clean separation between boolean and value expressions at the grammar level, ensuring most type safety during parsing rather than evaluation.
+
 ### Evaluator
 - **Variable substitution**: Bind runtime values to variables
 - **Type system**: Integer, Float, String, Boolean, Null
@@ -370,4 +372,4 @@ Contributions are welcome! Please ensure:
 
 ## Acknowledgments
 
-This parser implements a clean separation between boolean and value expressions at the grammar level, ensuring type safety during parsing rather than evaluation.
+Anthopic's Claude Sonnet 4.5 was used to generate most of the code and documentation in this project.
