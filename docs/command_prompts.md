@@ -1,3 +1,8 @@
+# A Word from the Developer
+
+The command prompts in this file capture the step-by-step refinement of parser and evaluator code. Anthropic's Claude Sonnet 4.5 was used to generate the code.  Some manual changes made directly to the code are not captured here.  Even without these manual modifications it's unlikely that running the same prompts in the future will yield the exact same results.  The prompts are given mostly for the historical record and to remind me what I did.   
+
+
 # Generate Parser from EBNF Definition
 
 1. brave_web_search w3c Extended Backus-Naur Form (EBNF) notation defined in Extensible Markup Language (XML) 1.0 (Fifth Edition) document, which can be found at https://www.w3.org/TR/xml/#sec-notation.
@@ -122,5 +127,13 @@ The fn test_error_in_operator_with_non_string and test_error_in_operator_with_no
 
 Since vectors and arrays in Rust must 
 
+## Create README.md
+
+Create a README.md file to: 
+
+1. Explain the main features of the project.
+2. Guide users on how to quickly use the parser and evaluator public functions.
+3. Explain the layout and content of the project.
+4. Introduce any other information that user would find helpful.
 
 

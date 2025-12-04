@@ -4,6 +4,8 @@
 
 This document provides a detailed plan for implementing the SQL expression evaluator using the Visitor Pattern with Mutable Context approach, based on the specified requirements.
 
+Note that the current implementation may deviate from that documented here due to a small number of direct manual changes to the code.  The basic implementation plan is intact.
+
 ---
 
 ## 1. Architecture Overview
@@ -12,28 +14,28 @@ This document provides a detailed plan for implementing the SQL expression evalu
 
 ```
 ┌─────────────────────────────────────────────────────────────┐
-│                     Public Interface                         │
-│  evaluate(input: &str, map: &HashMap<String, RuntimeValue>)│
+│                     Public Interface                        │
+│  evaluate(input: &str, map: &HashMap<String, RuntimeValue>) │
 └──────────────────────┬──────────────────────────────────────┘
                        │
                        ▼
 ┌─────────────────────────────────────────────────────────────┐
-│                    Parse Phase                               │
-│              parse(input) -> BooleanExpr                     │
+│                    Parse Phase                              │
+│              parse(input) -> BooleanExpr                    │
 └──────────────────────┬──────────────────────────────────────┘
                        │
                        ▼
 ┌─────────────────────────────────────────────────────────────┐
-│                 Substitution Phase                           │
-│         Replace all variables with RuntimeValues             │
-│         Validate all variables are bound                     │
+│                 Substitution Phase                          │
+│         Replace all variables with RuntimeValues            │
+│         Validate all variables are bound                    │
 └──────────────────────┬──────────────────────────────────────┘
                        │
                        ▼
 ┌─────────────────────────────────────────────────────────────┐
-│                 Evaluation Phase                             │
-│         Traverse AST and compute result                      │
-│         Type checking on demand                              │
+│                 Evaluation Phase                            │
+│         Traverse AST and compute result                     │
+│         Type checking on demand                             │
 └──────────────────────┬──────────────────────────────────────┘
                        │
                        ▼

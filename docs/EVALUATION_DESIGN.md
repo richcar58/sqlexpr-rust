@@ -560,6 +560,8 @@ impl BooleanExpr {
 
 ## Next Steps
 
+**NOTE: *Approach 1: Visitor Pattern with Mutable Context* was chosen for its simplicity.**
+
 If Approach 2 is selected:
 
 1. Create `src/eval.rs` module

@@ -1,0 +1,1534 @@
+
+running 114 tests
+test test_and_operator ... Input: a AND b
+AST:
+And
+   Variable: a
+   Variable: b
+
+Input: a AND b
+AST:
+And
+   Variable: a
+   Variable: b
+
+ok
+test test_arithmetic_addition_integers ... Input: a + b = 30
+AST:
+Relational
+   Equality: Equal
+      Add
+         Variable: a
+         Variable: b
+      Literal: Integer(30)
+
+ok
+test test_arithmetic_in_comparison ... Input: (a + b) > 12
+AST:
+Relational
+   Comparison: GreaterThan
+      Add
+         Variable: a
+         Variable: b
+      Literal: Integer(12)
+
+Input: (a - b) < 10
+AST:
+Relational
+   Comparison: LessThan
+      Subtract
+         Variable: a
+         Variable: b
+      Literal: Integer(10)
+
+Input: (a * b) = 50
+AST:
+Relational
+   Equality: Equal
+      Multiply
+         Variable: a
+         Variable: b
+      Literal: Integer(50)
+
+ok
+test test_arithmetic_mixed_types_coercion ... Input: a + b = 15.5
+AST:
+Relational
+   Equality: Equal
+      Add
+         Variable: a
+         Variable: b
+      Literal: Float(15.5)
+
+ok
+test test_arithmetic_multiplication ... Input: a * b = 30
+AST:
+Relational
+   Equality: Equal
+      Multiply
+         Variable: a
+         Variable: b
+      Literal: Integer(30)
+
+ok
+test test_arithmetic_null_error ... Input: a + b = 10
+AST:
+Relational
+   Equality: Equal
+      Add
+         Variable: a
+         Variable: b
+      Literal: Integer(10)
+
+ok
+test test_arithmetic_subtraction ... Input: a - b = 30
+AST:
+Relational
+   Equality: Equal
+      Subtract
+         Variable: a
+         Variable: b
+      Literal: Integer(30)
+
+ok
+test test_between ... Input: age BETWEEN 18 AND 65
+AST:
+Relational
+   Between: negated=false
+      Variable: age
+      Literal: Integer(18)
+      Literal: Integer(65)
+
+Input: age BETWEEN 30 AND 40
+AST:
+Relational
+   Between: negated=false
+      Variable: age
+      Literal: Integer(30)
+      Literal: Integer(40)
+
+ok
+test test_between_inclusive ... Input: x BETWEEN 5 AND 10
+AST:
+Relational
+   Between: negated=false
+      Variable: x
+      Literal: Integer(5)
+      Literal: Integer(10)
+
+Input: x BETWEEN 1 AND 5
+AST:
+Relational
+   Between: negated=false
+      Variable: x
+      Literal: Integer(1)
+      Literal: Integer(5)
+
+ok
+test test_between_integers ... Input: age BETWEEN 18 AND 30
+AST:
+Relational
+   Between: negated=false
+      Variable: age
+      Literal: Integer(18)
+      Literal: Integer(30)
+
+Input: age BETWEEN 30 AND 40
+AST:
+Relational
+   Between: negated=false
+      Variable: age
+      Literal: Integer(30)
+      Literal: Integer(40)
+
+ok
+test test_between_strings ... Input: name BETWEEN 'Alice' AND 'Zoe'
+AST:
+Relational
+   Between: negated=false
+      Variable: name
+      Literal: String("Alice")
+      Literal: String("Zoe")
+
+ok
+test test_boolean_literal_in_value_context ... Input: 'TRUE' = 'TRUE'
+AST:
+Relational
+   Equality: Equal
+      Literal: String("TRUE")
+      Literal: String("TRUE")
+
+Input: 'FALSE' != 'TRUE'
+AST:
+Relational
+   Equality: NotEqual
+      Literal: String("FALSE")
+      Literal: String("TRUE")
+
+ok
+test test_boolean_literals ... Input: TRUE
+AST:
+BooleanLiteral: true
+
+Input: FALSE
+AST:
+BooleanLiteral: false
+
+Input: NOT FALSE
+AST:
+Not
+   BooleanLiteral: false
+
+Input: TRUE AND TRUE
+AST:
+And
+   BooleanLiteral: true
+   BooleanLiteral: true
+
+Input: TRUE OR FALSE
+AST:
+Or
+   BooleanLiteral: true
+   BooleanLiteral: false
+
+ok
+test test_boolean_variables ... Input: active
+AST:
+Variable: active
+
+Input: NOT deleted
+AST:
+Not
+   Variable: deleted
+
+Input: active AND NOT deleted
+AST:
+And
+   Variable: active
+   Not
+      Variable: deleted
+
+ok
+test test_chained_comparisons_via_and ... Input: x >= 10 AND x <= 20
+AST:
+And
+   Relational
+      Comparison: GreaterOrEqual
+         Variable: x
+         Literal: Integer(10)
+   Relational
+      Comparison: LessOrEqual
+         Variable: x
+         Literal: Integer(20)
+
+ok
+test test_comparison_floats ... Input: price > 10.0
+AST:
+Relational
+   Comparison: GreaterThan
+      Variable: price
+      Literal: Float(10.0)
+
+Input: price < 20.0
+AST:
+Relational
+   Comparison: LessThan
+      Variable: price
+      Literal: Float(20.0)
+
+ok
+test test_comparison_integers ... Input: age > 18
+AST:
+Relational
+   Comparison: GreaterThan
+      Variable: age
+      Literal: Integer(18)
+
+Input: age < 30
+AST:
+Relational
+   Comparison: LessThan
+      Variable: age
+      Literal: Integer(30)
+
+Input: age >= 25
+AST:
+Relational
+   Comparison: GreaterOrEqual
+      Variable: age
+      Literal: Integer(25)
+
+Input: age <= 25
+AST:
+Relational
+   Comparison: LessOrEqual
+      Variable: age
+      Literal: Integer(25)
+
+Input: age = 25
+AST:
+Relational
+   Equality: Equal
+      Variable: age
+      Literal: Integer(25)
+
+Input: age <> 30
+AST:
+Relational
+   Equality: NotEqual
+      Variable: age
+      Literal: Integer(30)
+
+ok
+test test_comparison_strings ... Input: name > 'Alice'
+AST:
+Relational
+   Comparison: GreaterThan
+      Variable: name
+      Literal: String("Alice")
+
+Input: name < 'Zoe'
+AST:
+Relational
+   Comparison: LessThan
+      Variable: name
+      Literal: String("Zoe")
+
+Input: name = 'John'
+AST:
+Relational
+   Equality: Equal
+      Variable: name
+      Literal: String("John")
+
+ok
+test test_comparison_two_valueexpr ... Input: a + x + 6 = 12 + b + y
+AST:
+Relational
+   Equality: Equal
+      Add
+         Add
+            Variable: a
+            Variable: x
+         Literal: Integer(6)
+      Add
+         Add
+            Literal: Integer(12)
+            Variable: b
+         Variable: y
+
+ok
+test test_comparison_type_mismatch ... Input: age > name
+AST:
+Relational
+   Comparison: GreaterThan
+      Variable: age
+      Variable: name
+
+ok
+test test_complex_arithmetic_precedence ... Input: (a + b * c) = 14
+AST:
+Relational
+   Equality: Equal
+      Add
+         Variable: a
+         Multiply
+            Variable: b
+            Variable: c
+      Literal: Integer(14)
+
+Input: ((a + b) * c) = 20
+AST:
+Relational
+   Equality: Equal
+      Multiply
+         Add
+            Variable: a
+            Variable: b
+         Variable: c
+      Literal: Integer(20)
+
+ok
+test test_complex_boolean_expression ... Input: age >= 18 AND status = 'active' AND premium
+AST:
+And
+   And
+      Relational
+         Comparison: GreaterOrEqual
+            Variable: age
+            Literal: Integer(18)
+      Relational
+         Equality: Equal
+            Variable: status
+            Literal: String("active")
+   Variable: premium
+
+ok
+test test_complex_expression_crazy ... Input: (age >= 30 OR (age < 30 AND yesterday_score < 10)) AND status = 'active' AND score > 80.0 AND NOT like_bananas AND (height BETWEEN 5.5 AND 6.5) AND (fastest_speed / 2 > 70)
+AST:
+And
+   And
+      And
+         And
+            And
+               Or
+                  Relational
+                     Comparison: GreaterOrEqual
+                        Variable: age
+                        Literal: Integer(30)
+                  And
+                     Relational
+                        Comparison: LessThan
+                           Variable: age
+                           Literal: Integer(30)
+                     Relational
+                        Comparison: LessThan
+                           Variable: yesterday_score
+                           Literal: Integer(10)
+               Relational
+                  Equality: Equal
+                     Variable: status
+                     Literal: String("active")
+            Relational
+               Comparison: GreaterThan
+                  Variable: score
+                  Literal: Float(80.0)
+         Not
+            Variable: like_bananas
+      Relational
+         Between: negated=false
+            Variable: height
+            Literal: Float(5.5)
+            Literal: Float(6.5)
+   Relational
+      Comparison: GreaterThan
+         Divide
+            Variable: fastest_speed
+            Literal: Integer(2)
+         Literal: Integer(70)
+
+ok
+test test_complex_expression_real_world ... Input: age >= 18 AND status = 'active' AND score > 80.0
+AST:
+And
+   And
+      Relational
+         Comparison: GreaterOrEqual
+            Variable: age
+            Literal: Integer(18)
+      Relational
+         Equality: Equal
+            Variable: status
+            Literal: String("active")
+   Relational
+      Comparison: GreaterThan
+         Variable: score
+         Literal: Float(80.0)
+
+ok
+test test_complex_expression_with_arithmetic ... Input: (revenue - cost) / revenue * 100 >= 20
+AST:
+Relational
+   Comparison: GreaterOrEqual
+      Multiply
+         Divide
+            Subtract
+               Variable: revenue
+               Variable: cost
+            Variable: revenue
+         Literal: Integer(100)
+      Literal: Integer(20)
+
+ok
+test test_complex_nested_boolean ... Input: (a OR b) AND (c OR d)
+AST:
+And
+   Or
+      Variable: a
+      Variable: b
+   Or
+      Variable: c
+      Variable: d
+
+ok
+test test_deeply_nested_expression ... Input: ((((x > 0) AND (x < 10)) OR (x = 100)) AND NOT (x = 3))
+AST:
+And
+   Or
+      And
+         Relational
+            Comparison: GreaterThan
+               Variable: x
+               Literal: Integer(0)
+         Relational
+            Comparison: LessThan
+               Variable: x
+               Literal: Integer(10)
+      Relational
+         Equality: Equal
+            Variable: x
+            Literal: Integer(100)
+   Not
+      Relational
+         Equality: Equal
+            Variable: x
+            Literal: Integer(3)
+
+ok
+test test_division_always_returns_float ... Input: (x / y) > 3.0
+AST:
+Relational
+   Comparison: GreaterThan
+      Divide
+         Variable: x
+         Variable: y
+      Literal: Float(3.0)
+
+Input: (x / y) < 4.0
+AST:
+Relational
+   Comparison: LessThan
+      Divide
+         Variable: x
+         Variable: y
+      Literal: Float(4.0)
+
+ok
+test test_division_by_zero_error ... Input: a / 0 = 5
+AST:
+Relational
+   Equality: Equal
+      Divide
+         Variable: a
+         Literal: Integer(0)
+      Literal: Integer(5)
+
+ok
+test test_division_float_result ... Input: (a / b) > 3.4
+AST:
+Relational
+   Comparison: GreaterThan
+      Divide
+         Variable: a
+         Variable: b
+      Literal: Float(3.4)
+
+Input: (a / b) < 3.6
+AST:
+Relational
+   Comparison: LessThan
+      Divide
+         Variable: a
+         Variable: b
+      Literal: Float(3.6)
+
+ok
+test test_division_returns_float ... Input: a / b = 2.5
+AST:
+Relational
+   Equality: Equal
+      Divide
+         Variable: a
+         Variable: b
+      Literal: Float(2.5)
+
+ok
+test test_empty_string_like ... Input: x LIKE ''
+AST:
+Relational
+   Like: negated=false, pattern='', escape=None
+      Variable: x
+
+Input: x LIKE '%'
+AST:
+Relational
+   Like: negated=false, pattern='%', escape=None
+      Variable: x
+
+Input: x LIKE '_'
+AST:
+Relational
+   Like: negated=false, pattern='_', escape=None
+      Variable: x
+
+ok
+test test_equality_boolean ... Input: flag1 = flag2
+AST:
+Relational
+   Equality: Equal
+      Variable: flag1
+      Variable: flag2
+
+ok
+test test_error_boolean_in_arithmetic ... Input: flag + 5 = 10
+AST:
+Relational
+   Equality: Equal
+      Add
+         Variable: flag
+         Literal: Integer(5)
+      Literal: Integer(10)
+
+ok
+test test_error_boolean_variable_with_wrong_type ... Input: x AND TRUE
+AST:
+And
+   Variable: x
+   BooleanLiteral: true
+
+ok
+test test_error_division_by_zero ... Input: x / 0 > 0
+AST:
+Relational
+   Comparison: GreaterThan
+      Divide
+         Variable: x
+         Literal: Integer(0)
+      Literal: Integer(0)
+
+ok
+test test_error_in_operator_with_compatible_numeric_types ... Input: x IN (6, 7, 8)
+AST:
+Relational
+   In: negated=false, values=[Integer(6), Integer(7), Integer(8)]
+      Variable: x
+
+ok
+test test_error_in_operator_with_compatible_numeric_types_2 ... Input: x IN (6.1, .2, 8.0)
+AST:
+Relational
+   In: negated=false, values=[Float(6.1), Float(0.2), Float(8.0)]
+      Variable: x
+
+ok
+test test_error_in_operator_with_mixed_numeric_types ... Input: x IN (6, 7.0, 8)
+AST:
+Relational
+   In: negated=false, values=[Integer(6), Float(7.0), Integer(8)]
+      Variable: x
+
+ok
+test test_error_in_operator_with_non_numeric ... Input: x IN (6, 7, 8)
+AST:
+Relational
+   In: negated=false, values=[Integer(6), Integer(7), Integer(8)]
+      Variable: x
+
+ok
+test test_error_in_operator_with_non_string ... Input: x IN ('a', 'b')
+AST:
+Relational
+   In: negated=false, values=[String("a"), String("b")]
+      Variable: x
+
+ok
+test test_error_like_on_non_string ... Input: x LIKE '%test%'
+AST:
+Relational
+   Like: negated=false, pattern='%test%', escape=None
+      Variable: x
+
+ok
+test test_error_like_with_non_string ... Input: x LIKE '%42%'
+AST:
+Relational
+   Like: negated=false, pattern='%42%', escape=None
+      Variable: x
+
+ok
+test test_error_modulo_by_zero ... Input: (x % 0) = 0
+AST:
+Relational
+   Equality: Equal
+      Modulo
+         Variable: x
+         Literal: Integer(0)
+      Literal: Integer(0)
+
+ok
+test test_error_null_in_arithmetic ... Input: x + 5 = 10
+AST:
+Relational
+   Equality: Equal
+      Add
+         Variable: x
+         Literal: Integer(5)
+      Literal: Integer(10)
+
+ok
+test test_error_null_in_arithmetic_2 ... Input: (x + y) > 0
+AST:
+Relational
+   Comparison: GreaterThan
+      Add
+         Variable: x
+         Variable: y
+      Literal: Integer(0)
+
+ok
+test test_error_null_in_between ... Input: x BETWEEN 1 AND 10
+AST:
+Relational
+   Between: negated=false
+      Variable: x
+      Literal: Integer(1)
+      Literal: Integer(10)
+
+ok
+test test_error_null_in_between_2 ... Input: x BETWEEN 10 AND 20
+AST:
+Relational
+   Between: negated=false
+      Variable: x
+      Literal: Integer(10)
+      Literal: Integer(20)
+
+ok
+test test_error_null_in_comparison ... Input: x > 5
+AST:
+Relational
+   Comparison: GreaterThan
+      Variable: x
+      Literal: Integer(5)
+
+ok
+test test_error_null_in_comparison_2 ... Input: x > 10
+AST:
+Relational
+   Comparison: GreaterThan
+      Variable: x
+      Literal: Integer(10)
+
+ok
+test test_error_null_in_equality ... Input: x = 10
+AST:
+Relational
+   Equality: Equal
+      Variable: x
+      Literal: Integer(10)
+
+ok
+test test_error_null_in_in ... Input: x IN (1, 2, 3)
+AST:
+Relational
+   In: negated=false, values=[Integer(1), Integer(2), Integer(3)]
+      Variable: x
+
+ok
+test test_error_null_in_in_operator ... Input: x IN ('a', 'b')
+AST:
+Relational
+   In: negated=false, values=[String("a"), String("b")]
+      Variable: x
+
+ok
+test test_error_null_in_like ... Input: x LIKE '%test%'
+AST:
+Relational
+   Like: negated=false, pattern='%test%', escape=None
+      Variable: x
+
+ok
+test test_error_string_in_arithmetic ... Input: name + 5 = 10
+AST:
+Relational
+   Equality: Equal
+      Add
+         Variable: name
+         Literal: Integer(5)
+      Literal: Integer(10)
+
+ok
+test test_error_type_mismatch_in_arithmetic ... Input: (x + 10) > 0
+AST:
+Relational
+   Comparison: GreaterThan
+      Add
+         Variable: x
+         Literal: Integer(10)
+      Literal: Integer(0)
+
+ok
+test test_error_type_mismatch_in_comparison ... Input: age = name
+AST:
+Relational
+   Equality: Equal
+      Variable: age
+      Variable: name
+
+ok
+test test_error_type_mismatch_in_comparison_2 ... Input: x > y
+AST:
+Relational
+   Comparison: GreaterThan
+      Variable: x
+      Variable: y
+
+ok
+test test_error_unary_minus_on_null ... Input: (-x) = 0
+AST:
+Relational
+   Equality: Equal
+      UnaryMinus
+         Variable: x
+      Literal: Integer(0)
+
+ok
+test test_error_unary_minus_on_string ... Input: (-x) = 'test'
+AST:
+Relational
+   Equality: Equal
+      UnaryMinus
+         Variable: x
+      Literal: String("test")
+
+ok
+test test_error_unbound_variable ... Input: x > 10
+AST:
+Relational
+   Comparison: GreaterThan
+      Variable: x
+      Literal: Integer(10)
+
+ok
+test test_eval_boolean_literal_false ... Input: FALSE
+AST:
+BooleanLiteral: false
+
+ok
+test test_eval_boolean_literal_true ... Input: TRUE
+AST:
+BooleanLiteral: true
+
+ok
+test test_eval_boolean_variable ... Input: active
+AST:
+Variable: active
+
+ok
+test test_float_comparison ... Input: price > 10.0
+AST:
+Relational
+   Comparison: GreaterThan
+      Variable: price
+      Literal: Float(10.0)
+
+Input: price < 20.0
+AST:
+Relational
+   Comparison: LessThan
+      Variable: price
+      Literal: Float(20.0)
+
+Input: price >= 19.99
+AST:
+Relational
+   Comparison: GreaterOrEqual
+      Variable: price
+      Literal: Float(19.99)
+
+Input: price <= 19.99
+AST:
+Relational
+   Comparison: LessOrEqual
+      Variable: price
+      Literal: Float(19.99)
+
+ok
+test test_float_precision ... Input: x > 0.29
+AST:
+Relational
+   Comparison: GreaterThan
+      Variable: x
+      Literal: Float(0.29)
+
+Input: x < 0.31
+AST:
+Relational
+   Comparison: LessThan
+      Variable: x
+      Literal: Float(0.31)
+
+ok
+test test_in_integers ... Input: status IN (1, 2, 3)
+AST:
+Relational
+   In: negated=false, values=[Integer(1), Integer(2), Integer(3)]
+      Variable: status
+
+Input: status IN (4, 5, 6)
+AST:
+Relational
+   In: negated=false, values=[Integer(4), Integer(5), Integer(6)]
+      Variable: status
+
+ok
+test test_in_mixed_numeric_types ... Input: x IN (1, 2, 5)
+AST:
+Relational
+   In: negated=false, values=[Integer(1), Integer(2), Integer(5)]
+      Variable: x
+
+ok
+test test_in_operator ... Input: status IN ('active', 'pending')
+AST:
+Relational
+   In: negated=false, values=[String("active"), String("pending")]
+      Variable: status
+
+Input: status IN ('inactive', 'deleted')
+AST:
+Relational
+   In: negated=false, values=[String("inactive"), String("deleted")]
+      Variable: status
+
+ok
+test test_in_strings ... Input: state IN ('active', 'pending')
+AST:
+Relational
+   In: negated=false, values=[String("active"), String("pending")]
+      Variable: state
+
+ok
+test test_is_not_null ... Input: value IS NOT NULL
+AST:
+Relational
+   IsNull: negated=true
+      Variable: value
+
+ok
+test test_is_not_null_2 ... Input: x IS NOT NULL
+AST:
+Relational
+   IsNull: negated=true
+      Variable: x
+
+Input: y IS NOT NULL
+AST:
+Relational
+   IsNull: negated=true
+      Variable: y
+
+ok
+test test_is_null ... Input: value IS NULL
+AST:
+Relational
+   IsNull: negated=false
+      Variable: value
+
+ok
+test test_is_null_2 ... Input: x IS NULL
+AST:
+Relational
+   IsNull: negated=false
+      Variable: x
+
+Input: y IS NULL
+AST:
+Relational
+   IsNull: negated=false
+      Variable: y
+
+ok
+test test_is_null_with_non_null ... Input: value IS NULL
+AST:
+Relational
+   IsNull: negated=false
+      Variable: value
+
+ok
+test test_large_integer ... Input: x > 0
+AST:
+Relational
+   Comparison: GreaterThan
+      Variable: x
+      Literal: Integer(0)
+
+ok
+test test_like_basic ... Input: email LIKE '%@example.com'
+AST:
+Relational
+   Like: negated=false, pattern='%@example.com', escape=None
+      Variable: email
+
+Input: email LIKE 'user@%'
+AST:
+Relational
+   Like: negated=false, pattern='user@%', escape=None
+      Variable: email
+
+Input: email LIKE '%@%'
+AST:
+Relational
+   Like: negated=false, pattern='%@%', escape=None
+      Variable: email
+
+Input: email LIKE 'user@example.com'
+AST:
+Relational
+   Like: negated=false, pattern='user@example.com', escape=None
+      Variable: email
+
+ok
+test test_like_escape ... Input: text LIKE '50!%' ESCAPE '!'
+AST:
+Relational
+   Like: negated=false, pattern='50!%', escape=Some("!")
+      Variable: text
+
+ok
+test test_like_underscore ... Input: code LIKE 'ABC___'
+AST:
+Relational
+   Like: negated=false, pattern='ABC___', escape=None
+      Variable: code
+
+Input: code LIKE 'ABC__'
+AST:
+Relational
+   Like: negated=false, pattern='ABC__', escape=None
+      Variable: code
+
+ok
+test test_like_wildcard_percent ... Input: email LIKE '%@example.com'
+AST:
+Relational
+   Like: negated=false, pattern='%@example.com', escape=None
+      Variable: email
+
+Input: email LIKE 'user%'
+AST:
+Relational
+   Like: negated=false, pattern='user%', escape=None
+      Variable: email
+
+Input: email LIKE '%example%'
+AST:
+Relational
+   Like: negated=false, pattern='%example%', escape=None
+      Variable: email
+
+Input: email LIKE '%nobody%'
+AST:
+Relational
+   Like: negated=false, pattern='%nobody%', escape=None
+      Variable: email
+
+ok
+test test_like_wildcard_underscore ... Input: code LIKE 'A_B'
+AST:
+Relational
+   Like: negated=false, pattern='A_B', escape=None
+      Variable: code
+
+Input: code LIKE 'A__'
+AST:
+Relational
+   Like: negated=false, pattern='A__', escape=None
+      Variable: code
+
+Input: code LIKE '___'
+AST:
+Relational
+   Like: negated=false, pattern='___', escape=None
+      Variable: code
+
+Input: code LIKE 'A____'
+AST:
+Relational
+   Like: negated=false, pattern='A____', escape=None
+      Variable: code
+
+ok
+test test_like_with_escape ... Input: text LIKE '50\%' ESCAPE '\'
+AST:
+Relational
+   Like: negated=false, pattern='50\%', escape=Some("\\")
+      Variable: text
+
+ok
+test test_like_with_multiple_wildcards ... Input: path LIKE '%/%/%'
+AST:
+Relational
+   Like: negated=false, pattern='%/%/%', escape=None
+      Variable: path
+
+Input: path LIKE '/usr/%/bin'
+AST:
+Relational
+   Like: negated=false, pattern='/usr/%/bin', escape=None
+      Variable: path
+
+ok
+test test_logical_and ... Input: x > 10 AND y < 30
+AST:
+And
+   Relational
+      Comparison: GreaterThan
+         Variable: x
+         Literal: Integer(10)
+   Relational
+      Comparison: LessThan
+         Variable: y
+         Literal: Integer(30)
+
+Input: x > 10 AND y > 30
+AST:
+And
+   Relational
+      Comparison: GreaterThan
+         Variable: x
+         Literal: Integer(10)
+   Relational
+      Comparison: GreaterThan
+         Variable: y
+         Literal: Integer(30)
+
+ok
+test test_logical_not ... Input: NOT (x < 10)
+AST:
+Not
+   Relational
+      Comparison: LessThan
+         Variable: x
+         Literal: Integer(10)
+
+Input: NOT (x > 10)
+AST:
+Not
+   Relational
+      Comparison: GreaterThan
+         Variable: x
+         Literal: Integer(10)
+
+ok
+test test_logical_or ... Input: x > 10 OR y > 20
+AST:
+Or
+   Relational
+      Comparison: GreaterThan
+         Variable: x
+         Literal: Integer(10)
+   Relational
+      Comparison: GreaterThan
+         Variable: y
+         Literal: Integer(20)
+
+Input: x > 10 OR y < 20
+AST:
+Or
+   Relational
+      Comparison: GreaterThan
+         Variable: x
+         Literal: Integer(10)
+   Relational
+      Comparison: LessThan
+         Variable: y
+         Literal: Integer(20)
+
+ok
+test test_mixed_numeric_comparison ... Input: int_val < float_val
+AST:
+Relational
+   Comparison: LessThan
+      Variable: int_val
+      Variable: float_val
+
+Input: float_val > int_val
+AST:
+Relational
+   Comparison: GreaterThan
+      Variable: float_val
+      Variable: int_val
+
+Input: int_val < 10.5
+AST:
+Relational
+   Comparison: LessThan
+      Variable: int_val
+      Literal: Float(10.5)
+
+ok
+test test_modulo_operation ... Input: a % b = 1
+AST:
+Relational
+   Equality: Equal
+      Modulo
+         Variable: a
+         Variable: b
+      Literal: Integer(1)
+
+ok
+test test_modulo_operation_2 ... Input: (x % 5) = 2
+AST:
+Relational
+   Equality: Equal
+      Modulo
+         Variable: x
+         Literal: Integer(5)
+      Literal: Integer(2)
+
+Input: (x % 3) = 2
+AST:
+Relational
+   Equality: Equal
+      Modulo
+         Variable: x
+         Literal: Integer(3)
+      Literal: Integer(2)
+
+ok
+test test_multiple_and_or_precedence ... Input: FALSE AND TRUE OR TRUE
+AST:
+Or
+   And
+      BooleanLiteral: false
+      BooleanLiteral: true
+   BooleanLiteral: true
+
+Input: TRUE OR FALSE AND FALSE
+AST:
+Or
+   BooleanLiteral: true
+   And
+      BooleanLiteral: false
+      BooleanLiteral: false
+
+ok
+test test_negative_integer ... Input: x < 0
+AST:
+Relational
+   Comparison: LessThan
+      Variable: x
+      Literal: Integer(0)
+
+Input: x = -42
+AST:
+Relational
+   Equality: Equal
+      Variable: x
+      UnaryMinus
+         Literal: Integer(42)
+
+ok
+test test_not_between ... Input: age NOT BETWEEN 18 AND 65
+AST:
+Relational
+   Between: negated=true
+      Variable: age
+      Literal: Integer(18)
+      Literal: Integer(65)
+
+ok
+test test_not_between_2 ... Input: score NOT BETWEEN 0 AND 59
+AST:
+Relational
+   Between: negated=true
+      Variable: score
+      Literal: Integer(0)
+      Literal: Integer(59)
+
+Input: score NOT BETWEEN 90 AND 100
+AST:
+Relational
+   Between: negated=true
+      Variable: score
+      Literal: Integer(90)
+      Literal: Integer(100)
+
+ok
+test test_not_in ... Input: x NOT IN (1, 2, 3)
+AST:
+Relational
+   In: negated=true, values=[Integer(1), Integer(2), Integer(3)]
+      Variable: x
+
+ok
+test test_not_in_operator ... Input: role NOT IN ('admin', 'moderator')
+AST:
+Relational
+   In: negated=true, values=[String("admin"), String("moderator")]
+      Variable: role
+
+Input: role NOT IN ('user', 'guest')
+AST:
+Relational
+   In: negated=true, values=[String("user"), String("guest")]
+      Variable: role
+
+ok
+test test_not_like ... Input: name NOT LIKE '%test%'
+AST:
+Relational
+   Like: negated=true, pattern='%test%', escape=None
+      Variable: name
+
+ok
+test test_not_like_2 ... Input: email NOT LIKE '%@example.com'
+AST:
+Relational
+   Like: negated=true, pattern='%@example.com', escape=None
+      Variable: email
+
+ok
+test test_not_operator ... Input: NOT active
+AST:
+Not
+   Variable: active
+
+ok
+test test_numeric_literals ... Input: 42 > 10
+AST:
+Relational
+   Comparison: GreaterThan
+      Literal: Integer(42)
+      Literal: Integer(10)
+
+Input: 3.14 < 4.0
+AST:
+Relational
+   Comparison: LessThan
+      Literal: Float(3.14)
+      Literal: Float(4.0)
+
+Input: 0xFF = 255
+AST:
+Relational
+   Equality: Equal
+      Literal: Integer(255)
+      Literal: Integer(255)
+
+Input: 010 = 8
+AST:
+Relational
+   Equality: Equal
+      Literal: Integer(8)
+      Literal: Integer(8)
+
+ok
+test test_operator_precedence ... Input: a OR b AND c
+AST:
+Or
+   Variable: a
+   And
+      Variable: b
+      Variable: c
+
+ok
+test test_or_operator ... Input: a OR b
+AST:
+Or
+   Variable: a
+   Variable: b
+
+Input: a OR b
+AST:
+Or
+   Variable: a
+   Variable: b
+
+ok
+test test_parenthesized_expressions ... Input: (x + y) * 2 > 25
+AST:
+Relational
+   Comparison: GreaterThan
+      Multiply
+         Add
+            Variable: x
+            Variable: y
+         Literal: Integer(2)
+      Literal: Integer(25)
+
+Input: ((x > 0) AND (y > 0))
+AST:
+And
+   Relational
+      Comparison: GreaterThan
+         Variable: x
+         Literal: Integer(0)
+   Relational
+      Comparison: GreaterThan
+         Variable: y
+         Literal: Integer(0)
+
+ok
+test test_precedence_no_parens ... Input: 2 + 3 * 4 = a
+AST:
+Relational
+   Equality: Equal
+      Add
+         Literal: Integer(2)
+         Multiply
+            Literal: Integer(3)
+            Literal: Integer(4)
+      Variable: a
+
+ok
+test test_precedence_with_parens ... Input: (2 + 3) * 4 = a
+AST:
+Relational
+   Equality: Equal
+      Multiply
+         Add
+            Literal: Integer(2)
+            Literal: Integer(3)
+         Literal: Integer(4)
+      Variable: a
+
+ok
+test test_short_circuit_and ... Input: x > 10 AND x < 20
+AST:
+And
+   Relational
+      Comparison: GreaterThan
+         Variable: x
+         Literal: Integer(10)
+   Relational
+      Comparison: LessThan
+         Variable: x
+         Literal: Integer(20)
+
+ok
+test test_short_circuit_or ... Input: x > 10 OR x < 5
+AST:
+Or
+   Relational
+      Comparison: GreaterThan
+         Variable: x
+         Literal: Integer(10)
+   Relational
+      Comparison: LessThan
+         Variable: x
+         Literal: Integer(5)
+
+ok
+test test_simple_integer_comparison ... Input: x > 10
+AST:
+Relational
+   Comparison: GreaterThan
+      Variable: x
+      Literal: Integer(10)
+
+Input: x < 100
+AST:
+Relational
+   Comparison: LessThan
+      Variable: x
+      Literal: Integer(100)
+
+Input: x = 42
+AST:
+Relational
+   Equality: Equal
+      Variable: x
+      Literal: Integer(42)
+
+Input: x != 10
+AST:
+Relational
+   Equality: NotEqual
+      Variable: x
+      Literal: Integer(10)
+
+Input: x <> 10
+AST:
+Relational
+   Equality: NotEqual
+      Variable: x
+      Literal: Integer(10)
+
+ok
+test test_string_case_sensitivity ... Input: name = 'Alice'
+AST:
+Relational
+   Equality: Equal
+      Variable: name
+      Literal: String("Alice")
+
+Input: name = 'alice'
+AST:
+Relational
+   Equality: Equal
+      Variable: name
+      Literal: String("alice")
+
+ok
+test test_string_comparison ... Input: name = 'Alice'
+AST:
+Relational
+   Equality: Equal
+      Variable: name
+      Literal: String("Alice")
+
+Input: name != 'Bob'
+AST:
+Relational
+   Equality: NotEqual
+      Variable: name
+      Literal: String("Bob")
+
+Input: name > 'Aaron'
+AST:
+Relational
+   Comparison: GreaterThan
+      Variable: name
+      Literal: String("Aaron")
+
+Input: name < 'Zoe'
+AST:
+Relational
+   Comparison: LessThan
+      Variable: name
+      Literal: String("Zoe")
+
+ok
+test test_unary_minus ... Input: -a = -10
+AST:
+Relational
+   Equality: Equal
+      UnaryMinus
+         Variable: a
+      UnaryMinus
+         Literal: Integer(10)
+
+ok
+test test_unary_minus_2 ... Input: (-x) = -10
+AST:
+Relational
+   Equality: Equal
+      UnaryMinus
+         Variable: x
+      UnaryMinus
+         Literal: Integer(10)
+
+Input: (-x) < 0
+AST:
+Relational
+   Comparison: LessThan
+      UnaryMinus
+         Variable: x
+      Literal: Integer(0)
+
+ok
+test test_unary_plus ... Input: +a = 10
+AST:
+Relational
+   Equality: Equal
+      UnaryPlus
+         Variable: a
+      Literal: Integer(10)
+
+ok
+test test_unbound_variable_error ... Input: missing
+AST:
+Variable: missing
+
+ok
+test test_wrong_type_boolean_variable ... Input: x
+AST:
+Variable: x
+
+ok
+
+test result: ok. 114 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.02s
+
