@@ -166,6 +166,7 @@ impl Parser {
         }
     }
 
+    #[allow(clippy::only_used_in_recursion)]
     fn print_value_expr(&self, expr: &ValueExpr, indent: usize) {
         let prefix = " ".repeat(indent);
         match expr {
@@ -304,12 +305,10 @@ impl Parser {
     /// Check if two literals are exactly the same type (for IN list)
     /// No mixing of Integer and Float allowed
     fn are_exact_same_type(a: &ValueLiteral, b: &ValueLiteral) -> bool {
-        match (a, b) {
-            (ValueLiteral::Integer(_), ValueLiteral::Integer(_)) => true,
-            (ValueLiteral::Float(_), ValueLiteral::Float(_)) => true,
-            (ValueLiteral::String(_), ValueLiteral::String(_)) => true,
-            _ => false,
-        }
+        matches!((a, b), 
+            (ValueLiteral::Integer(_), ValueLiteral::Integer(_)) |
+            (ValueLiteral::Float(_), ValueLiteral::Float(_))     |
+            (ValueLiteral::String(_), ValueLiteral::String(_)))
     }
 
     /// Validate BETWEEN bounds: lower must be <= upper

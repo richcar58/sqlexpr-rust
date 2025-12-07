@@ -268,7 +268,7 @@ impl<'a> Evaluator<'a> {
             // Type mismatch
             _ => return Err(EvalError::TypeError {
                 operation: format!("{:?}", op),
-                expected: format!("matching types"),
+                expected: "matching types".to_string(),
                 actual: format!("{} vs {}", l_val.type_name(), r_val.type_name()),
                 context: "equality comparison".to_string(),
             }),

@@ -98,7 +98,7 @@ pub struct Lexer {
 impl Lexer {
     pub fn new(input: &str) -> Self {
         let chars: Vec<char> = input.chars().collect();
-        let current_char = chars.get(0).copied();
+        let current_char = chars.first().copied();
         Lexer {
             input: chars,
             position: 0,
@@ -241,7 +241,7 @@ impl Lexer {
         }
 
         // Check for octal (starts with 0)
-        if self.current_char == Some('0') && self.peek().map_or(false, |c| c.is_ascii_digit()) {
+        if self.current_char == Some('0') && self.peek().is_some_and(|c| c.is_ascii_digit()) {
             return self.read_octal_literal();
         }
 
@@ -260,7 +260,7 @@ impl Lexer {
         }
 
         // Check for decimal point
-        if self.current_char == Some('.') && self.peek().map_or(false, |c| c.is_ascii_digit() || c == 'e' || c == 'E') {
+        if self.current_char == Some('.') && self.peek().is_some_and(|c| c.is_ascii_digit() || c == 'e' || c == 'E') {
             is_float = true;
             num_str.push('.');
             self.advance();
@@ -349,7 +349,7 @@ impl Lexer {
         let mut octal_str = String::new();
 
         while let Some(ch) = self.current_char {
-            if ch >= '0' && ch <= '7' {
+            if ('0'..='7').contains(&ch) {
                 octal_str.push(ch);
                 self.advance();
             } else {
@@ -499,7 +499,7 @@ impl Lexer {
                 }
                 '.' => {
                     // Check if this is a float starting with '.'
-                    if self.peek().map_or(false, |c| c.is_ascii_digit()) {
+                    if self.peek().is_some_and(|c| c.is_ascii_digit()) {
                         return self.read_float_starting_with_dot();
                     }
                     return Err(self.format_error(&format!("Unexpected character: '{}'", ch)));
