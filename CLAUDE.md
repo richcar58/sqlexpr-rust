@@ -23,7 +23,7 @@ cargo test
 # Run library tests only
 cargo test --lib
 
-# Run integration tests only
+# Run parser integration tests only
 cargo test --test parser_tests
 
 # Run a specific test
@@ -99,6 +99,7 @@ The parser implements a strict type hierarchy enforced at the grammar level:
 - **Backtracking** for disambiguating parenthesized expressions
 - **Lookahead** to distinguish variables from relational expressions
 - **Type safety** enforced at parse time (rejects standalone arithmetic/literals)
+- **Enhanced type checking** for BETWEEN and IN operators (see below)
 
 ### Operator Precedence (Highest to Lowest)
 
@@ -117,6 +118,75 @@ The parser implements a strict type hierarchy enforced at the grammar level:
 2. **SQL comment compatibility**: `--` always starts a line comment (use `- -x` with space for double negation)
 3. **Parenthesized expressions**: Parser uses backtracking to distinguish `(x > 5)` from `(x + y) > 5`
 4. **NOT operator context**: `NOT` can be boolean negation OR part of NOT LIKE/BETWEEN/IN operators
+5. **Enhanced BETWEEN/IN type checking**: Strict type checking at parse time (see Type Checking Rules below)
+
+## Type Checking Rules
+
+### BETWEEN and NOT BETWEEN Operators
+
+**Restrictions enforced at parse time:**
+- Both lower and upper bounds **must be literal values** (not variables or expressions)
+- Unary minus is allowed for negative numbers (e.g., `x BETWEEN -10 AND -5`)
+- Both bounds must be the same type category:
+  - **Numeric**: Integer or Float (mixing is allowed, e.g., `x BETWEEN 1 AND 10.5`)
+  - **String**: String literals only
+- NULL and Boolean literals are **rejected**
+- **Lower bound must be ≤ upper bound** (enforced for all types)
+
+**Examples:**
+```rust
+// Valid
+parse("x BETWEEN 1 AND 10");           // Both integers
+parse("x BETWEEN 1.5 AND 10.5");       // Both floats
+parse("x BETWEEN 1 AND 10.5");         // Mixed numeric (allowed)
+parse("name BETWEEN 'Alice' AND 'Zeus'"); // Both strings
+parse("temp BETWEEN -10 AND 5");       // Negative numbers
+parse("x BETWEEN 5 AND 5");            // Equal bounds (allowed)
+
+// Invalid - will fail at parse time
+parse("x BETWEEN NULL AND 10");        // NULL not allowed
+parse("x BETWEEN TRUE AND FALSE");     // Boolean not allowed
+parse("x BETWEEN 'hello' AND 10");     // Type mismatch
+parse("x BETWEEN y AND 10");           // Variable not allowed
+parse("x BETWEEN (y + 5) AND 10");     // Expression not allowed
+parse("x BETWEEN 10 AND 1");           // Lower > upper (not allowed)
+parse("x BETWEEN 'Zeus' AND 'Alice'"); // Lower > upper for strings
+```
+
+### IN and NOT IN Operators
+
+**Restrictions enforced at parse time:**
+- All values **must be literal values** (not variables or expressions)
+- Only Integer, Float, or String literals are allowed
+- NULL and Boolean literals are **rejected**
+- All values must be **exactly the same type**:
+  - All Integer, OR all Float, OR all String
+  - **No mixing** of Integer and Float (stricter than previous versions)
+  - **Different formats of the same type ARE allowed**:
+    - Integer: decimal, hex (0x), octal (0), long (L suffix) can be mixed
+    - Float: decimal (with .) and exponential (e notation) can be mixed
+- Type checking is performed incrementally as values are parsed (fail-fast)
+
+**Examples:**
+```rust
+// Valid
+parse("x IN (1, 2, 3)");                    // All integers
+parse("score IN (1.5, 2.5, 3.5)");          // All floats
+parse("status IN ('active', 'pending')");   // All strings
+parse("flags IN (0x00, 0xFF)");             // Hex integers (all Integer type)
+parse("perms IN (0644, 0755)");             // Octal integers (all Integer type)
+parse("x IN (100, 0x64, 0144, 100L)");      // Mixed integer formats (all Integer type)
+parse("y IN (1.5, 2.5e0, 3.14)");           // Mixed float formats (all Float type)
+parse("z IN (1e2, 100.0, 1.0e2)");          // More mixed float formats
+
+// Invalid - will fail at parse time
+parse("x IN (1, NULL, 3)");                 // NULL not allowed
+parse("x IN (1, TRUE, 3)");                 // Boolean not allowed
+parse("x IN (1, 2.5, 3)");                  // Mixed Integer/Float not allowed
+parse("x IN ('hello', 1, 'world')");        // Mixed String/Integer not allowed
+```
+
+**Breaking Change:** Previous versions allowed mixing Integer and Float in IN lists (e.g., `x IN (1, 2.5, 3)`). This is now rejected at parse time for stricter type safety.
 
 ## Common Patterns
 
@@ -190,7 +260,9 @@ This makes it easy to identify exactly where and what caused the error. All erro
 
 ## Test Coverage
 
-The test suite (`tests/parser_tests.rs`) includes 155 comprehensive tests covering:
+The project includes 380 comprehensive tests across multiple test suites:
+
+**Parser tests** (`tests/parser_tests.rs` - 155 tests):
 - All boolean operators (AND, OR, NOT)
 - All comparison operators
 - LIKE/NOT LIKE with and without ESCAPE
@@ -202,6 +274,24 @@ The test suite (`tests/parser_tests.rs`) includes 155 comprehensive tests coveri
 - Comments (line and block)
 - Complex nested expressions
 - Error cases (rejecting standalone arithmetic, etc.)
+
+**Parser type checking tests** (`tests/parser_type_checking_tests.rs` - 97 tests):
+- BETWEEN positive tests: valid numeric and string literals
+- BETWEEN negative tests: NULL, Boolean, type mismatches, variables, expressions
+- BETWEEN bounds validation: lower > upper detection for all types
+- IN positive tests: all Integer, all Float, all String
+- IN negative tests: NULL, Boolean, mixed types
+- IN mixed format tests: hex/octal/decimal/long integers, decimal/exponential floats
+- Edge cases: empty strings, duplicates, complex expressions
+- Error message quality verification
+
+**Evaluator tests** (`tests/evaluator_tests.rs` - 114 tests):
+- Runtime evaluation of all operators
+- Type checking at evaluation time
+- Variable binding and resolution
+- Arithmetic operations with type compatibility
+- NULL handling in operations
+- Error cases for runtime type mismatches
 
 ### Enhanced Test Error Messages
 

@@ -212,6 +212,170 @@ impl Parser {
     }
 
     // ========================================================================
+    // TYPE CHECKING HELPER FUNCTIONS
+    // ========================================================================
+
+    /// Extract literal from ValueExpr, returning error if not a literal
+    /// Special case: UnaryMinus/UnaryPlus of a literal is allowed (for negative/positive numbers)
+    fn extract_literal(expr: &ValueExpr) -> ParseResult<ValueLiteral> {
+        match expr {
+            ValueExpr::Literal(lit) => Ok(lit.clone()),
+            // Handle unary minus for negative numbers
+            ValueExpr::UnaryMinus(inner) => {
+                if let ValueExpr::Literal(lit) = inner.as_ref() {
+                    match lit {
+                        ValueLiteral::Integer(n) => Ok(ValueLiteral::Integer(-n)),
+                        ValueLiteral::Float(f) => Ok(ValueLiteral::Float(-f)),
+                        _ => Err(ParseError {
+                            message: "Unary minus can only be applied to numeric literals in BETWEEN bounds".to_string(),
+                        }),
+                    }
+                } else {
+                    Err(ParseError {
+                        message: "Complex expressions are not allowed here, only literal values".to_string(),
+                    })
+                }
+            }
+            // Handle unary plus (just unwrap it)
+            ValueExpr::UnaryPlus(inner) => {
+                if let ValueExpr::Literal(lit) = inner.as_ref() {
+                    Ok(lit.clone())
+                } else {
+                    Err(ParseError {
+                        message: "Complex expressions are not allowed here, only literal values".to_string(),
+                    })
+                }
+            }
+            ValueExpr::Variable(_) => Err(ParseError {
+                message: "Variables are not allowed here, only literal values".to_string(),
+            }),
+            _ => Err(ParseError {
+                message: "Complex expressions are not allowed here, only literal values".to_string(),
+            }),
+        }
+    }
+
+    /// Get literal type name for error messages
+    fn literal_type_name(lit: &ValueLiteral) -> &'static str {
+        match lit {
+            ValueLiteral::Integer(_) => "integer",
+            ValueLiteral::Float(_) => "float",
+            ValueLiteral::String(_) => "string",
+            ValueLiteral::Null => "NULL",
+            ValueLiteral::Boolean(_) => "boolean",
+        }
+    }
+
+    /// Check if two literals are type-compatible for BETWEEN
+    /// Both must be numeric (Integer or Float) OR both must be String
+    fn are_between_compatible(lower: &ValueLiteral, upper: &ValueLiteral) -> bool {
+        match (lower, upper) {
+            // Both numeric
+            (ValueLiteral::Integer(_), ValueLiteral::Integer(_)) => true,
+            (ValueLiteral::Integer(_), ValueLiteral::Float(_)) => true,
+            (ValueLiteral::Float(_), ValueLiteral::Integer(_)) => true,
+            (ValueLiteral::Float(_), ValueLiteral::Float(_)) => true,
+            // Both string
+            (ValueLiteral::String(_), ValueLiteral::String(_)) => true,
+            // Everything else incompatible
+            _ => false,
+        }
+    }
+
+    /// Validate literal for IN list (reject Null and Boolean)
+    fn validate_in_literal(&self, lit: &ValueLiteral) -> ParseResult<()> {
+        match lit {
+            ValueLiteral::Null => Err(ParseError {
+                message: format!(
+                    "NULL is not allowed in IN list near position {} in:\n  {}",
+                    self.position, self.input
+                ),
+            }),
+            ValueLiteral::Boolean(_) => Err(ParseError {
+                message: format!(
+                    "Boolean literals are not allowed in IN list near position {} in:\n  {}",
+                    self.position, self.input
+                ),
+            }),
+            ValueLiteral::Integer(_) | ValueLiteral::Float(_) | ValueLiteral::String(_) => Ok(()),
+        }
+    }
+
+    /// Check if two literals are exactly the same type (for IN list)
+    /// No mixing of Integer and Float allowed
+    fn are_exact_same_type(a: &ValueLiteral, b: &ValueLiteral) -> bool {
+        match (a, b) {
+            (ValueLiteral::Integer(_), ValueLiteral::Integer(_)) => true,
+            (ValueLiteral::Float(_), ValueLiteral::Float(_)) => true,
+            (ValueLiteral::String(_), ValueLiteral::String(_)) => true,
+            _ => false,
+        }
+    }
+
+    /// Validate BETWEEN bounds: lower must be <= upper
+    fn validate_between_bounds(lower: &ValueLiteral, upper: &ValueLiteral, input: &str, position: usize) -> ParseResult<()> {
+        match (lower, upper) {
+            // Integer comparison
+            (ValueLiteral::Integer(l), ValueLiteral::Integer(u)) => {
+                if l > u {
+                    return Err(ParseError {
+                        message: format!(
+                            "BETWEEN lower bound ({}) must be less than or equal to upper bound ({}) near position {} in:\n  {}",
+                            l, u, position, input
+                        ),
+                    });
+                }
+            }
+            // Float comparison
+            (ValueLiteral::Float(l), ValueLiteral::Float(u)) => {
+                if l > u {
+                    return Err(ParseError {
+                        message: format!(
+                            "BETWEEN lower bound ({}) must be less than or equal to upper bound ({}) near position {} in:\n  {}",
+                            l, u, position, input
+                        ),
+                    });
+                }
+            }
+            // Mixed numeric: Integer and Float
+            (ValueLiteral::Integer(l), ValueLiteral::Float(u)) => {
+                if (*l as f64) > *u {
+                    return Err(ParseError {
+                        message: format!(
+                            "BETWEEN lower bound ({}) must be less than or equal to upper bound ({}) near position {} in:\n  {}",
+                            l, u, position, input
+                        ),
+                    });
+                }
+            }
+            (ValueLiteral::Float(l), ValueLiteral::Integer(u)) => {
+                if *l > (*u as f64) {
+                    return Err(ParseError {
+                        message: format!(
+                            "BETWEEN lower bound ({}) must be less than or equal to upper bound ({}) near position {} in:\n  {}",
+                            l, u, position, input
+                        ),
+                    });
+                }
+            }
+            // String comparison
+            (ValueLiteral::String(l), ValueLiteral::String(u)) => {
+                if l > u {
+                    return Err(ParseError {
+                        message: format!(
+                            "BETWEEN lower bound ('{}') must be less than or equal to upper bound ('{}') near position {} in:\n  {}",
+                            l, u, position, input
+                        ),
+                    });
+                }
+            }
+            // Other combinations should have been caught by type compatibility check
+            _ => {}
+        }
+        Ok(())
+    }
+
+    // ========================================================================
     // BOOLEAN EXPRESSION PARSING
     // ========================================================================
 
@@ -452,13 +616,70 @@ impl Parser {
                     }
                     Token::Between => {
                         self.advance();
-                        let lower = self.parse_value_expression()?;
+                        let lower_expr = self.parse_value_expression()?;
                         self.expect(Token::And)?;
-                        let upper = self.parse_value_expression()?;
+                        let upper_expr = self.parse_value_expression()?;
+
+                        // Extract literals from expressions
+                        let lower_lit = Self::extract_literal(&lower_expr)?;
+                        let upper_lit = Self::extract_literal(&upper_expr)?;
+
+                        // Reject NULL
+                        if matches!(lower_lit, ValueLiteral::Null) {
+                            return Err(ParseError {
+                                message: format!(
+                                    "NULL is not allowed as lower bound in NOT BETWEEN near position {} in:\n  {}",
+                                    self.position, self.input
+                                ),
+                            });
+                        }
+                        if matches!(upper_lit, ValueLiteral::Null) {
+                            return Err(ParseError {
+                                message: format!(
+                                    "NULL is not allowed as upper bound in NOT BETWEEN near position {} in:\n  {}",
+                                    self.position, self.input
+                                ),
+                            });
+                        }
+
+                        // Reject Boolean
+                        if matches!(lower_lit, ValueLiteral::Boolean(_)) {
+                            return Err(ParseError {
+                                message: format!(
+                                    "Boolean literals are not allowed as lower bound in NOT BETWEEN near position {} in:\n  {}",
+                                    self.position, self.input
+                                ),
+                            });
+                        }
+                        if matches!(upper_lit, ValueLiteral::Boolean(_)) {
+                            return Err(ParseError {
+                                message: format!(
+                                    "Boolean literals are not allowed as upper bound in NOT BETWEEN near position {} in:\n  {}",
+                                    self.position, self.input
+                                ),
+                            });
+                        }
+
+                        // Check type compatibility
+                        if !Self::are_between_compatible(&lower_lit, &upper_lit) {
+                            return Err(ParseError {
+                                message: format!(
+                                    "NOT BETWEEN bounds must be both numeric or both string, found {} and {} near position {} in:\n  {}",
+                                    Self::literal_type_name(&lower_lit),
+                                    Self::literal_type_name(&upper_lit),
+                                    self.position,
+                                    self.input
+                                ),
+                            });
+                        }
+
+                        // Validate bounds order: lower <= upper
+                        Self::validate_between_bounds(&lower_lit, &upper_lit, &self.input, self.position)?;
+
                         Ok(RelationalExpr::Between {
                             expr: left,
-                            lower,
-                            upper,
+                            lower: lower_expr,
+                            upper: upper_expr,
                             negated: true,
                         })
                     }
@@ -478,13 +699,70 @@ impl Parser {
             }
             Token::Between => {
                 self.advance();
-                let lower = self.parse_value_expression()?;
+                let lower_expr = self.parse_value_expression()?;
                 self.expect(Token::And)?;
-                let upper = self.parse_value_expression()?;
+                let upper_expr = self.parse_value_expression()?;
+
+                // Extract literals from expressions
+                let lower_lit = Self::extract_literal(&lower_expr)?;
+                let upper_lit = Self::extract_literal(&upper_expr)?;
+
+                // Reject NULL
+                if matches!(lower_lit, ValueLiteral::Null) {
+                    return Err(ParseError {
+                        message: format!(
+                            "NULL is not allowed as lower bound in BETWEEN near position {} in:\n  {}",
+                            self.position, self.input
+                        ),
+                    });
+                }
+                if matches!(upper_lit, ValueLiteral::Null) {
+                    return Err(ParseError {
+                        message: format!(
+                            "NULL is not allowed as upper bound in BETWEEN near position {} in:\n  {}",
+                            self.position, self.input
+                        ),
+                    });
+                }
+
+                // Reject Boolean
+                if matches!(lower_lit, ValueLiteral::Boolean(_)) {
+                    return Err(ParseError {
+                        message: format!(
+                            "Boolean literals are not allowed as lower bound in BETWEEN near position {} in:\n  {}",
+                            self.position, self.input
+                        ),
+                    });
+                }
+                if matches!(upper_lit, ValueLiteral::Boolean(_)) {
+                    return Err(ParseError {
+                        message: format!(
+                            "Boolean literals are not allowed as upper bound in BETWEEN near position {} in:\n  {}",
+                            self.position, self.input
+                        ),
+                    });
+                }
+
+                // Check type compatibility
+                if !Self::are_between_compatible(&lower_lit, &upper_lit) {
+                    return Err(ParseError {
+                        message: format!(
+                            "BETWEEN bounds must be both numeric or both string, found {} and {} near position {} in:\n  {}",
+                            Self::literal_type_name(&lower_lit),
+                            Self::literal_type_name(&upper_lit),
+                            self.position,
+                            self.input
+                        ),
+                    });
+                }
+
+                // Validate bounds order: lower <= upper
+                Self::validate_between_bounds(&lower_lit, &upper_lit, &self.input, self.position)?;
+
                 Ok(RelationalExpr::Between {
                     expr: left,
-                    lower,
-                    upper,
+                    lower: lower_expr,
+                    upper: upper_expr,
                     negated: false,
                 })
             }
@@ -531,16 +809,40 @@ impl Parser {
         }
     }
 
-    /// Parse value literal list for IN operator: "(" Literal { "," Literal } ")"
-    /// Supports both string and numeric literals
+    /// Parse value literal list for IN operator with strict type checking
+    /// All values must be the same exact type (Integer, Float, or String)
+    /// NULL and Boolean are rejected
     fn parse_string_list(&mut self) -> ParseResult<Vec<ValueLiteral>> {
         self.expect(Token::LeftParen)?;
 
-        let mut values = vec![self.expect_value_literal()?];
+        let first = self.expect_value_literal()?;
+
+        // Validate first literal (reject NULL and Boolean)
+        self.validate_in_literal(&first)?;
+
+        let mut values = vec![first.clone()];
 
         while self.current_token() == &Token::Comma {
             self.advance();
-            values.push(self.expect_value_literal()?);
+            let next = self.expect_value_literal()?;
+
+            // Validate this literal (reject NULL and Boolean)
+            self.validate_in_literal(&next)?;
+
+            // Check type consistency with first value
+            if !Self::are_exact_same_type(&first, &next) {
+                return Err(ParseError {
+                    message: format!(
+                        "IN list values must all be the same type, found {} and {} near position {} in:\n  {}",
+                        Self::literal_type_name(&first),
+                        Self::literal_type_name(&next),
+                        self.position,
+                        self.input
+                    ),
+                });
+            }
+
+            values.push(next);
         }
 
         self.expect(Token::RightParen)?;

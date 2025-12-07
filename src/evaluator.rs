@@ -459,13 +459,13 @@ impl<'a> Evaluator<'a> {
             });
         }
 
-        // First pass: check if all list values are of incompatible type with left value
-        // This helps us distinguish between "not found" and "type mismatch"
+        // Type consistency of the values list is now guaranteed by the parser,
+        // so we only need to check if the left operand is type-compatible with the list
         if !values.is_empty() {
             let first_list_val = SubValue::from_literal(&values[0]);
             let is_compatible = Self::are_types_compatible_for_in(&val, &first_list_val);
 
-             // If list is incompatible with left value, it's a type error
+            // If list is incompatible with left value, it's a type error
             if !is_compatible {
                 return Err(EvalError::TypeError {
                     operation: "IN".to_string(),
@@ -475,21 +475,7 @@ impl<'a> Evaluator<'a> {
                 });
             }
 
-           // Check if all list values are same type as first
-            let all_same_type = values.iter().all(|lit| {
-                let list_val = SubValue::from_literal(lit);
-                Self::are_same_type(&first_list_val, &list_val)
-            });
-
-             // If list is incompatible with left value, it's a type error
-            if !all_same_type {
-                return Err(EvalError::TypeError {
-                    operation: "IN".to_string(),
-                    expected: first_list_val.type_name(),
-                    actual: val.type_name(),
-                    context: "match list contains elements of different types".to_string(),
-                });
-            }
+            // Note: Type consistency check for list elements removed - now done at parse time
         }
 
         let mut found = false;
@@ -819,18 +805,6 @@ impl<'a> Evaluator<'a> {
             (SubValue::Integer(_), SubValue::Float(_)) => true,
             (SubValue::Float(_), SubValue::Integer(_)) => true,
             // Everything else is incompatible
-            _ => false,
-        }
-    }
-
-    /// Check if two values have the same type
-    fn are_same_type(a: &SubValue, b: &SubValue) -> bool {
-        match (a, b) {
-            (SubValue::Integer(_), SubValue::Integer(_)) => true,
-            (SubValue::Float(_), SubValue::Float(_)) => true,
-            (SubValue::String(_), SubValue::String(_)) => true,
-            (SubValue::Boolean(_), SubValue::Boolean(_)) => true,
-            (SubValue::Null, SubValue::Null) => true,
             _ => false,
         }
     }

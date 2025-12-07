@@ -136,4 +136,22 @@ Create a README.md file to:
 3. Explain the layout and content of the project.
 4. Introduce any other information that user would find helpful.
 
+# Tighten Parser Semantics and Type Checking
+
+The goal of the next enhancement is to increase parser type checking to detect type errors early, for greater efficiency and for simplified semantics.  Please plan for the following Parser changes:
+
+1. BETWEEN and NOT BETWEEN - The lower and upper bounds must either both be strings or both be numeric when an input string is submitted to the parser.  Numeric means either ValueLiteral::Integer or ValueLiteral::Float literals can be used separately or in combination.  The mixing of numeric types is acceptable since they are compatible for comparison purposes.  The Parser should check that (1) the lower and upper limits are always assigned and (2) the assignments are type consistent.  No other literal or expression values can be assigned to the lower and upper bounds.  During parsing, a clear and informative type error should be issued when the new restrictions are violated.
+
+2. IN and NOT IN - The values field in RelationalExpr::In is currently defined as a Vec<ValueLiteral>.  Type checking should detect when ValueLiteral::Null or ValueLiteral::Boolean elements are assigned to the values field and clearly report that as type error.  The only types that should appear in a values vector are ValueLiteral::Integer, ValueLiteral::Float and ValueLiteral::String.  Since all elements of a vector must be of the same Rust type, the three allowed ValueLiteral types cannot be mixed:  All values elements must be of the exact same ValueLiteral type.  
+
+3. Currently, Evaluator::are_same_type() enforces type consistency in elements of RelationalExpr::In::values vectors.  This type check should be performed during parsing rather than during evaluation.  The type checking should enforce the more restrictive semantics specified above in item 2.  In addition, rather than executing a separate pass over all elements assigned to values, type checking should be performed as literals are being assigned to values.  As soon as an assignment would cause elements of different types to be added to the values vector, parsing should fail with an informative type error message.
+
+Please generate a plan for making these enhancements along with a comprehensive set of positive and negative tests.
+
+# More Parser Type Checking
+
+Continuing with previous enhancements to Parser type check, please implement the following:
+
+1. BETWEEN and NOT BETWEEN - Verify that the lower bound is always less than or equal to the upper bound.  Generate negative test cases that show the enforcement of this restriction.
+2. IN and NOT IN - Generate new test cases that allow different input integer formats to be specified in the same values vectors.  Specifically, integers written in a mixture of hex, octal, decimal (without decimal point) and long formats should be accepted as valid elements in the same values vector.  Similarly, generate new test cases that allow different input float formats to be specified in values vectors.  Specifically, floating point numbers written in a mixture of decimal (with decimal point) and exponential formats should be accepted as valid elements in the same values vector.
 

@@ -1152,20 +1152,14 @@ fn test_error_in_operator_with_non_numeric() {
 }
 
 // Mixed numeric types (Integer and Float) are not allowed in IN operator list
+// NOTE: This is now detected at parse time, not evaluation time
 #[test]
 fn test_error_in_operator_with_mixed_numeric_types() {
-    let mut map = HashMap::new();
-    map.insert("x".to_string(), RuntimeValue::Integer(8));
+    use sqlexpr_rust::parse;
 
-    let result = evaluate("x IN (6, 7.0, 8)", &map);
-    assert!(result.is_err());
-    match result.unwrap_err() {
-        EvalError::TypeError { operation, expected, .. } => {
-            assert_eq!(operation, "IN");
-            assert_eq!(expected, "integer");
-        }
-        _ => panic!("Expected TypeError"),
-    }
+    // This should fail at parse time, not evaluation time
+    let result = parse("x IN (6, 7.0, 8)");
+    assert!(result.is_err(), "Expected parse error for mixed Integer/Float in IN list");
 }
 
 #[test]

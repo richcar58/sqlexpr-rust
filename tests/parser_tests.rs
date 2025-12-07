@@ -623,11 +623,13 @@ fn test_not_between_operator() {
 
 #[test]
 fn test_between_with_expressions() {
+    // NOTE: BETWEEN now requires literal bounds, not expressions
+    // This is a breaking change - expressions in BETWEEN are no longer allowed
     let result = parse("(x + y) BETWEEN (a - 5) AND (b * 2)");
-    if let Err(e) = &result {
-        eprintln!("Parse error: {}", e);
+    if let Ok(r) = &result {
+        eprintln!("Expected error but found success: {}", r);
     }
-    assert!(result.is_ok());
+    assert!(result.is_err(), "Expected error for expressions in BETWEEN bounds");
 }
 
 #[test]
@@ -764,11 +766,13 @@ fn test_in_with_hex_values() {
 
 #[test]
 fn test_in_with_mixed_numeric_types() {
+    // NOTE: Mixing Integer and Float is no longer allowed in IN lists
+    // This is a breaking change - all values must be exactly the same type
     let result = parse("value IN (10, 20.5, 0x1F, 100L)");
-    if let Err(e) = &result {
-        eprintln!("Parse error: {}", e);
+    if let Ok(r) = &result {
+        eprintln!("Expected error but found success: {}", r);
     }
-    assert!(result.is_ok());
+    assert!(result.is_err(), "Expected error for mixed Integer/Float in IN list");
 }
 
 #[test]
@@ -819,11 +823,13 @@ fn test_in_with_octal_values() {
 
 #[test]
 fn test_in_with_mixed_values() {
+    // NOTE: Mixing Integer and Float is no longer allowed in IN lists
+    // This is a breaking change - all values must be exactly the same type
     let result = parse("v IN (0644, 0x755, 777, 3000000L, 3.14e2, 2.628)");
-    if let Err(e) = &result {
-        eprintln!("Parse error: {}", e);
+    if let Ok(r) = &result {
+        eprintln!("Expected error but found success: {}", r);
     }
-    assert!(result.is_ok());
+    assert!(result.is_err(), "Expected error for mixed Integer/Float in IN list");
 }
 
 #[test]
@@ -839,11 +845,13 @@ fn test_in_mixed_strings_and_numbers_strings_only() {
 
 #[test]
 fn test_in_zero_values() {
+    // NOTE: Mixing Integer (0) and Float (0.0) is no longer allowed
+    // This is a breaking change - all values must be exactly the same type
     let result = parse("count IN (0, 0.0)");
-    if let Err(e) = &result {
-        eprintln!("Parse error: {}", e);
+    if let Ok(r) = &result {
+        eprintln!("Expected error but found success: {}", r);
     }
-    assert!(result.is_ok());
+    assert!(result.is_err(), "Expected error for mixed Integer/Float in IN list");
 }
 
 // ============================================================================
