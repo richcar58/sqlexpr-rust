@@ -601,13 +601,7 @@ Relational
       Variable: x
 
 ok
-test test_error_in_operator_with_mixed_numeric_types ... Input: x IN (6, 7.0, 8)
-AST:
-Relational
-   In: negated=false, values=[Integer(6), Float(7.0), Integer(8)]
-      Variable: x
-
-ok
+test test_error_in_operator_with_mixed_numeric_types ... ok
 test test_error_in_operator_with_non_numeric ... Input: x IN (6, 7, 8)
 AST:
 Relational

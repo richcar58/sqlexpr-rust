@@ -112,21 +112,7 @@ Relational
       Literal: String("2024-12-31")
 
 ok
-test test_between_with_expressions ... Input: (x + y) BETWEEN (a - 5) AND (b * 2)
-AST:
-Relational
-   Between: negated=false
-      Add
-         Variable: x
-         Variable: y
-      Subtract
-         Variable: a
-         Literal: Integer(5)
-      Multiply
-         Variable: b
-         Literal: Integer(2)
-
-ok
+test test_between_with_expressions ... ok
 test test_between_with_mixed_string_cases ... Input: city BETWEEN 'Boston' AND 'Seattle'
 AST:
 Relational
@@ -611,20 +597,8 @@ Relational
       Variable: age
 
 ok
-test test_in_with_mixed_numeric_types ... Input: value IN (10, 20.5, 0x1F, 100L)
-AST:
-Relational
-   In: negated=false, values=[Integer(10), Float(20.5), Integer(31), Integer(100)]
-      Variable: value
-
-ok
-test test_in_with_mixed_values ... Input: v IN (0644, 0x755, 777, 3000000L, 3.14e2, 2.628)
-AST:
-Relational
-   In: negated=false, values=[Integer(420), Integer(1877), Integer(777), Integer(3000000), Float(314.0), Float(2.628)]
-      Variable: v
-
-ok
+test test_in_with_mixed_numeric_types ... ok
+test test_in_with_mixed_values ... ok
 test test_in_with_octal_values ... Input: permissions IN (0644, 0755, 0777)
 AST:
 Relational
@@ -639,13 +613,7 @@ Relational
       Variable: measurement
 
 ok
-test test_in_zero_values ... Input: count IN (0, 0.0)
-AST:
-Relational
-   In: negated=false, values=[Integer(0), Float(0.0)]
-      Variable: count
-
-ok
+test test_in_zero_values ... ok
 test test_integer_literal ... Input: x = 42
 AST:
 Relational

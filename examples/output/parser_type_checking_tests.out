@@ -1,0 +1,469 @@
+
+running 97 tests
+test test_between_boolean_lower ... ok
+test test_between_boolean_upper ... ok
+test test_between_both_boolean ... ok
+test test_between_both_floats ... Input: x BETWEEN 1.5 AND 10.5
+AST:
+Relational
+   Between: negated=false
+      Variable: x
+      Literal: Float(1.5)
+      Literal: Float(10.5)
+
+ok
+test test_between_both_integers ... Input: x BETWEEN 1 AND 10
+AST:
+Relational
+   Between: negated=false
+      Variable: x
+      Literal: Integer(1)
+      Literal: Integer(10)
+
+ok
+test test_between_both_null ... ok
+test test_between_both_strings ... Input: name BETWEEN 'Alice' AND 'Zeus'
+AST:
+Relational
+   Between: negated=false
+      Variable: name
+      Literal: String("Alice")
+      Literal: String("Zeus")
+
+ok
+test test_between_empty_strings ... Input: code BETWEEN '' AND 'Z'
+AST:
+Relational
+   Between: negated=false
+      Variable: code
+      Literal: String("")
+      Literal: String("Z")
+
+ok
+test test_between_equal_bounds_floats ... Input: x BETWEEN 5.5 AND 5.5
+AST:
+Relational
+   Between: negated=false
+      Variable: x
+      Literal: Float(5.5)
+      Literal: Float(5.5)
+
+ok
+test test_between_equal_bounds_integers ... Input: x BETWEEN 50 AND 50
+AST:
+Relational
+   Between: negated=false
+      Variable: x
+      Literal: Integer(50)
+      Literal: Integer(50)
+
+ok
+test test_between_equal_bounds_strings ... Input: name BETWEEN 'Alice' AND 'Alice'
+AST:
+Relational
+   Between: negated=false
+      Variable: name
+      Literal: String("Alice")
+      Literal: String("Alice")
+
+ok
+test test_between_expression_lower ... ok
+test test_between_expression_upper ... ok
+test test_between_float_and_string ... ok
+test test_between_hex_literals ... Input: flags BETWEEN 0x00 AND 0xFF
+AST:
+Relational
+   Between: negated=false
+      Variable: flags
+      Literal: Integer(0)
+      Literal: Integer(255)
+
+ok
+test test_between_int_and_string ... ok
+test test_between_long_literals ... Input: id BETWEEN 1000000L AND 9999999L
+AST:
+Relational
+   Between: negated=false
+      Variable: id
+      Literal: Integer(1000000)
+      Literal: Integer(9999999)
+
+ok
+test test_between_lower_greater_than_upper_floats ... ok
+test test_between_lower_greater_than_upper_integers ... ok
+test test_between_lower_greater_than_upper_mixed_float_int ... ok
+test test_between_lower_greater_than_upper_mixed_int_float ... ok
+test test_between_lower_greater_than_upper_strings ... ok
+test test_between_mixed_numeric_float_int ... Input: x BETWEEN 1.5 AND 10
+AST:
+Relational
+   Between: negated=false
+      Variable: x
+      Literal: Float(1.5)
+      Literal: Integer(10)
+
+ok
+test test_between_mixed_numeric_int_float ... Input: x BETWEEN 1 AND 10.5
+AST:
+Relational
+   Between: negated=false
+      Variable: x
+      Literal: Integer(1)
+      Literal: Float(10.5)
+
+ok
+test test_between_negative_and_positive ... Input: balance BETWEEN -100 AND 100
+AST:
+Relational
+   Between: negated=false
+      Variable: balance
+      UnaryMinus
+         Literal: Integer(100)
+      Literal: Integer(100)
+
+ok
+test test_between_negative_floats ... Input: value BETWEEN -3.14 AND -1.5
+AST:
+Relational
+   Between: negated=false
+      Variable: value
+      UnaryMinus
+         Literal: Float(3.14)
+      UnaryMinus
+         Literal: Float(1.5)
+
+ok
+test test_between_negative_numbers ... Input: temp BETWEEN -10 AND -5
+AST:
+Relational
+   Between: negated=false
+      Variable: temp
+      UnaryMinus
+         Literal: Integer(10)
+      UnaryMinus
+         Literal: Integer(5)
+
+ok
+test test_between_null_error_message ... ok
+test test_between_null_lower ... ok
+test test_between_null_upper ... ok
+test test_between_octal_literals ... Input: perms BETWEEN 0644 AND 0777
+AST:
+Relational
+   Between: negated=false
+      Variable: perms
+      Literal: Integer(420)
+      Literal: Integer(511)
+
+ok
+test test_between_reverse_order ... ok
+test test_between_same_value ... Input: x BETWEEN 5 AND 5
+AST:
+Relational
+   Between: negated=false
+      Variable: x
+      Literal: Integer(5)
+      Literal: Integer(5)
+
+ok
+test test_between_scientific_notation ... Input: measure BETWEEN 1.5e-10 AND 2.5e-10
+AST:
+Relational
+   Between: negated=false
+      Variable: measure
+      Literal: Float(1.5e-10)
+      Literal: Float(2.5e-10)
+
+ok
+test test_between_string_and_float ... ok
+test test_between_string_and_int ... ok
+test test_between_type_mismatch_error_message ... ok
+test test_between_variable_error_message ... ok
+test test_between_variable_lower ... ok
+test test_between_variable_upper ... ok
+test test_between_with_zero ... Input: x BETWEEN 0 AND 10
+AST:
+Relational
+   Between: negated=false
+      Variable: x
+      Literal: Integer(0)
+      Literal: Integer(10)
+
+ok
+test test_complex_between_in_expression ... Input: (x BETWEEN 1 AND 10) AND (status IN ('a', 'b'))
+AST:
+And
+   Relational
+      Between: negated=false
+         Variable: x
+         Literal: Integer(1)
+         Literal: Integer(10)
+   Relational
+      In: negated=false, values=[String("a"), String("b")]
+         Variable: status
+
+ok
+test test_in_all_floats ... Input: score IN (1.5, 2.5, 3.5)
+AST:
+Relational
+   In: negated=false, values=[Float(1.5), Float(2.5), Float(3.5)]
+      Variable: score
+
+ok
+test test_in_all_integers ... Input: x IN (1, 2, 3, 4, 5)
+AST:
+Relational
+   In: negated=false, values=[Integer(1), Integer(2), Integer(3), Integer(4), Integer(5)]
+      Variable: x
+
+ok
+test test_in_all_strings ... Input: status IN ('active', 'pending', 'completed')
+AST:
+Relational
+   In: negated=false, values=[String("active"), String("pending"), String("completed")]
+      Variable: status
+
+ok
+test test_in_alternating_types ... ok
+test test_in_boolean_error_message ... ok
+test test_in_duplicate_values ... Input: x IN (1, 2, 1, 3)
+AST:
+Relational
+   In: negated=false, values=[Integer(1), Integer(2), Integer(1), Integer(3)]
+      Variable: x
+
+ok
+test test_in_hex_integers ... Input: flags IN (0x00, 0x0F, 0xFF)
+AST:
+Relational
+   In: negated=false, values=[Integer(0), Integer(15), Integer(255)]
+      Variable: flags
+
+ok
+test test_in_long_integers ... Input: id IN (1000000L, 2000000L, 3000000L)
+AST:
+Relational
+   In: negated=false, values=[Integer(1000000), Integer(2000000), Integer(3000000)]
+      Variable: id
+
+ok
+test test_in_many_values ... Input: x IN (1, 2, 3, 4, 5, 6, 7, 8, 9, 10)
+AST:
+Relational
+   In: negated=false, values=[Integer(1), Integer(2), Integer(3), Integer(4), Integer(5), Integer(6), Integer(7), Integer(8), Integer(9), Integer(10)]
+      Variable: x
+
+ok
+test test_in_mixed_float_formats_decimal_exponential ... Input: x IN (1.5, 2.5e0, 3.5)
+AST:
+Relational
+   In: negated=false, values=[Float(1.5), Float(2.5), Float(3.5)]
+      Variable: x
+
+ok
+test test_in_mixed_float_formats_negative_values ... Input: x IN (-1.5, -2.5e0, -3.5)
+AST:
+Relational
+   In: negated=false, values=[Float(-1.5), Float(-2.5), Float(-3.5)]
+      Variable: x
+
+ok
+test test_in_mixed_float_formats_positive_exponent ... Input: x IN (100.0, 1e2, 1.0e2)
+AST:
+Relational
+   In: negated=false, values=[Float(100.0), Float(100.0), Float(100.0)]
+      Variable: x
+
+ok
+test test_in_mixed_float_formats_scientific ... Input: x IN (1.5e-10, 2.5e-10, 3.5)
+AST:
+Relational
+   In: negated=false, values=[Float(1.5e-10), Float(2.5e-10), Float(3.5)]
+      Variable: x
+
+ok
+test test_in_mixed_float_int ... ok
+test test_in_mixed_float_string ... ok
+test test_in_mixed_int_float ... ok
+test test_in_mixed_int_string ... ok
+test test_in_mixed_integer_formats_all_types ... Input: x IN (100, 0x64, 0144, 100L)
+AST:
+Relational
+   In: negated=false, values=[Integer(100), Integer(100), Integer(100), Integer(100)]
+      Variable: x
+
+ok
+test test_in_mixed_integer_formats_hex_decimal ... Input: x IN (0xFF, 255, 0x10)
+AST:
+Relational
+   In: negated=false, values=[Integer(255), Integer(255), Integer(16)]
+      Variable: x
+
+ok
+test test_in_mixed_integer_formats_long_decimal ... Input: x IN (1000000L, 2000000, 3000000L)
+AST:
+Relational
+   In: negated=false, values=[Integer(1000000), Integer(2000000), Integer(3000000)]
+      Variable: x
+
+ok
+test test_in_mixed_integer_formats_negative ... Input: x IN (-10, 0xFF, -0x05, 100L)
+AST:
+Relational
+   In: negated=false, values=[Integer(-10), Integer(255), Integer(-5), Integer(100)]
+      Variable: x
+
+ok
+test test_in_mixed_integer_formats_octal_decimal ... Input: x IN (0755, 493, 0644)
+AST:
+Relational
+   In: negated=false, values=[Integer(493), Integer(493), Integer(420)]
+      Variable: x
+
+ok
+test test_in_mixed_string_float ... ok
+test test_in_mixed_string_int ... ok
+test test_in_mixed_types_all_three ... ok
+test test_in_negative_floats ... Input: balance IN (-100.5, -50.25, 0.0)
+AST:
+Relational
+   In: negated=false, values=[Float(-100.5), Float(-50.25), Float(0.0)]
+      Variable: balance
+
+ok
+test test_in_negative_integers ... Input: temp IN (-10, -5, 0, 5, 10)
+AST:
+Relational
+   In: negated=false, values=[Integer(-10), Integer(-5), Integer(0), Integer(5), Integer(10)]
+      Variable: temp
+
+ok
+test test_in_null_error_message ... ok
+test test_in_octal_integers ... Input: perms IN (0644, 0755, 0777)
+AST:
+Relational
+   In: negated=false, values=[Integer(420), Integer(493), Integer(511)]
+      Variable: perms
+
+ok
+test test_in_scientific_floats ... Input: measure IN (1.5e-10, 2.5e-10, 3.5e-10)
+AST:
+Relational
+   In: negated=false, values=[Float(1.5e-10), Float(2.5e-10), Float(3.5e-10)]
+      Variable: measure
+
+ok
+test test_in_single_float ... Input: value IN (3.14)
+AST:
+Relational
+   In: negated=false, values=[Float(3.14)]
+      Variable: value
+
+ok
+test test_in_single_integer ... Input: code IN (42)
+AST:
+Relational
+   In: negated=false, values=[Integer(42)]
+      Variable: code
+
+ok
+test test_in_single_string ... Input: state IN ('running')
+AST:
+Relational
+   In: negated=false, values=[String("running")]
+      Variable: state
+
+ok
+test test_in_type_mismatch_error_message ... ok
+test test_in_with_boolean ... ok
+test test_in_with_boolean_first ... ok
+test test_in_with_boolean_only ... ok
+test test_in_with_null ... ok
+test test_in_with_null_first ... ok
+test test_in_with_null_only ... ok
+test test_larger_lower ... ok
+test test_nested_not_between_not_in ... Input: NOT (x BETWEEN 1 AND 5) OR NOT (y IN (10, 20))
+AST:
+Or
+   Not
+      Relational
+         Between: negated=false
+            Variable: x
+            Literal: Integer(1)
+            Literal: Integer(5)
+   Not
+      Relational
+         In: negated=false, values=[Integer(10), Integer(20)]
+            Variable: y
+
+ok
+test test_not_between_floats ... Input: score NOT BETWEEN 0.0 AND 59.9
+AST:
+Relational
+   Between: negated=true
+      Variable: score
+      Literal: Float(0.0)
+      Literal: Float(59.9)
+
+ok
+test test_not_between_integers ... Input: x NOT BETWEEN 1 AND 10
+AST:
+Relational
+   Between: negated=true
+      Variable: x
+      Literal: Integer(1)
+      Literal: Integer(10)
+
+ok
+test test_not_between_lower_greater_than_upper ... ok
+test test_not_between_null_lower ... ok
+test test_not_between_strings ... Input: code NOT BETWEEN 'A' AND 'M'
+AST:
+Relational
+   Between: negated=true
+      Variable: code
+      Literal: String("A")
+      Literal: String("M")
+
+ok
+test test_not_between_type_mismatch ... ok
+test test_not_in_floats ... Input: score NOT IN (0.0, 0.5, 1.0)
+AST:
+Relational
+   In: negated=true, values=[Float(0.0), Float(0.5), Float(1.0)]
+      Variable: score
+
+ok
+test test_not_in_integers ... Input: x NOT IN (1, 2, 3)
+AST:
+Relational
+   In: negated=true, values=[Integer(1), Integer(2), Integer(3)]
+      Variable: x
+
+ok
+test test_not_in_mixed_float_formats ... Input: x NOT IN (1.0, 2.0e0, 3.14159)
+AST:
+Relational
+   In: negated=true, values=[Float(1.0), Float(2.0), Float(3.14159)]
+      Variable: x
+
+ok
+test test_not_in_mixed_integer_formats ... Input: x NOT IN (0x00, 0, 0644, 1000L)
+AST:
+Relational
+   In: negated=true, values=[Integer(0), Integer(0), Integer(420), Integer(1000)]
+      Variable: x
+
+ok
+test test_not_in_mixed_types ... ok
+test test_not_in_strings ... Input: role NOT IN ('admin', 'root')
+AST:
+Relational
+   In: negated=true, values=[String("admin"), String("root")]
+      Variable: role
+
+ok
+test test_not_in_with_null ... ok
+
+test result: ok. 97 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
