@@ -7,7 +7,6 @@ description = "A SQL expression parser and evaluator in Rust"
 repository = "https://github.com/richcar58/sqlexpr-rust"
 readme = "README.md"
 license = "MIT"
-license-file = "LICENSE"
 keywords = ["sql", "expression", "parser", "evaluator", "boolean"]
 categories = ["parsing", "parser-implementations"]
 exclude = [
