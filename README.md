@@ -1,6 +1,6 @@
 # SQL Expression Parser & Evaluator
 
-A Rust library for parsing and evaluating SQL-like boolean expressions with full support for comparisons, arithmetic, pattern matching, and logical operators.
+A Rust library for parsing and evaluating SQL-like boolean expressions with full support for comparisons, arithmetic, pattern matching, and logical operators.  Also see *CLAUDE.md* and *SqlExprParser-EBNF-Final.ebnf* for related documentation.
 
 There are two Java SqlExpr parser/evaluator implementations that accept basically the same language as this Rust parser.  See [sqlexpr-javacc](https://github.com/richcar58/sqlexpr-javacc) for a parser built using the [JavaCC](https://javacc.github.io/javacc/) parser generator; see [sqlexpr-congocc](https://github.com/richcar58/sqlexpr-congocc) for a parser built using the [CongoCC](https://parsers.org/) parser generator.
 

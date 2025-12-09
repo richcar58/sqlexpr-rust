@@ -234,7 +234,7 @@ And
 ```
 
 **Features:**
-- Activated via `SQLEXPR_PRETTY=true` environment variable (case insensitive)
+- Activated via `SQLEXPR_PRETTY=true` environment variable (case insensitive value)
 - Prints original input string
 - Shows complete AST structure with proper indentation (3 spaces per level)
 - Displays node types and their contents
