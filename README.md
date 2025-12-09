@@ -137,6 +137,7 @@ sqlexpr-rust/
 │   └── evaluator.rs     # Expression evaluation engine
 ├── tests/
 │   ├── parser_tests.rs  # Parser test suite (155 tests)
+│   ├── parser_type_checking_tests.rs  # Parser type test suite (97 tests)
 │   └── evaluator_tests.rs # Evaluator test suite (111 tests)
 ├── examples/
 │   ├── showcase.rs      # Feature demonstration
@@ -147,7 +148,10 @@ sqlexpr-rust/
 │   └── command_prompts.md              # Development notes
 ├── SqlExprParser-EBNF-Final.ebnf  # Formal grammar specification
 ├── Cargo.toml
-└── README.md
+├── CLAUDE.md
+├── LICENSE
+├── README.md
+└── SqlExprParser-EBNF-Final.ebnf
 ```
 
 ## Core Components
