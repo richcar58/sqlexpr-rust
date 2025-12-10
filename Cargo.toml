@@ -16,7 +16,7 @@ exclude = [
     "/tests/*", 
     "/.github", 
     "/CLAUDE.md",
-    "/README.md",
+    "/RELEASE_NOTES.md",
     "/SqlExprParser-EBNF-Final.ebnf",
 ]
 
