@@ -1,11 +1,23 @@
-// Recursive Descent Parser for SQL Expression Grammar
-//
-// This module implements a parser that follows the EBNF grammar specification.
-// It uses recursive descent parsing with proper operator precedence.
+//! Recursive Descent Parser for SQL Expression Grammar
+//!
+//! This module implements a parser that follows the EBNF grammar specification.
+//! It uses recursive descent parsing with proper operator precedence to build
+//! an Abstract Syntax Tree (AST) from the input SQL expression string.  The
+//! input string is first tokenized by the lexer module and then parsed into
+//! the AST defined in the ast module.  The parser ensures that all top-level
+//! expressions evaluate to boolean values, while arithmetic and value expressions
+//! can only appear as operands to relational operators. 
+//! 
+//! The parser also performs as much type checking at parse time as possible. Additional 
+//! runtime type checking is necessary during evaluation after variable values are known.  
+//! 
+//! The parser also supports pretty-printing of the AST when the
+//! SQLEXPR_PRETTY environment variable is set to "true".
 
 use crate::ast::*;
 use crate::lexer::{Lexer, Token};
 
+/// Parser struct used to track parsing state and options.
 pub struct Parser {
     tokens: Vec<Token>,
     position: usize,
@@ -13,6 +25,7 @@ pub struct Parser {
     input: String,
 }
 
+/// Parse error type that defines specific error messages.
 #[derive(Debug)]
 pub struct ParseError {
     pub message: String,
@@ -1035,7 +1048,19 @@ impl Parser {
     }
 }
 
-/// Public API function to parse a SQL expression string
+/// Public API function to parse a SQL boolean expression string.
+///
+/// # Examples
+/// ```
+/// use sqlexpr_rust::parse;
+///
+/// let result: Result<BooleanExpr, ParseError> = parse("x > 5 OR y < 10");
+/// assert!(result.is_ok());
+/// 
+/// let result: Result<BooleanExpr, ParseError> = parse("name LIKE '%test%'");
+/// assert!(result.is_ok());
+/// ```
+
 pub fn parse(input: &str) -> Result<BooleanExpr, ParseError> {
     let mut parser = Parser::new(input)?;
     parser.parse()

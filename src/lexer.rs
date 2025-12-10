@@ -1,13 +1,16 @@
-// Lexer/Tokenizer for SQL Expression Parser
-//
-// This module handles tokenization of SQL expressions, including:
-// - Case-insensitive keywords
-// - String literals with SQL-style escaping
-// - Numeric literals (decimal, hex, octal, floating-point)
-// - Comments (line and block)
-// - Whitespace handling
+//! Lexer/Tokenizer for SQL Expression Parser
+//!
+//! This internal module handles tokenization of SQL expressions, including:
+//!  - Case-insensitive keywords
+//!  - String literals with SQL-style escaping
+//!  - Numeric literals (decimal, hex, octal, floating-point)
+//! - Comments (line and block)
+//! - Whitespace handling
 
 use std::fmt;
+
+/// Token types for SQL Expression Parser.
+/// Includes keywords, operators, literals, and delimiters.
 
 #[derive(Debug, Clone, PartialEq)]
 pub enum Token {
@@ -89,6 +92,7 @@ impl fmt::Display for Token {
     }
 }
 
+/// Lexer struct used during tokenization of an input string.
 pub struct Lexer {
     input: Vec<char>,
     position: usize,

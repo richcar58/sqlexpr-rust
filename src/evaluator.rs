@@ -1,3 +1,10 @@
+//! Evaluator definitions for SQL Expression Evaluation
+//!
+//! This module defines the Evaluator structure that applies runtime values to an AST
+//! to determine if the boolean expression represented by the AST evaluates to true,
+//! false or results in a runtime error.  Runtime type checking is applied after
+//! value substitution to ensure type safety during evaluation.
+
 use crate::ast::*;
 use crate::parser::{parse, ParseError};
 
@@ -103,7 +110,7 @@ impl From<ParseError> for EvalError {
 }
 
 
-/// Public evaluation function - evaluates a SQL boolean expression with variable bindings
+/// Public evaluation function that calculates the value of an AST given a mpa variable bindings.
 ///
 /// # Arguments
 /// * `input` - SQL expression string to evaluate (must be boolean-valued)

@@ -1,11 +1,11 @@
-// SQL Expression Parser Library
-//
-// This library provides a parser for SQL boolean expressions following the
-// grammar defined in SqlExprParser-EBNF-Final.ebnf
-//
-// The parser enforces type safety at the grammar level: all top-level expressions
-// must evaluate to boolean values, while arithmetic and value expressions can only
-// appear as operands to relational operators.
+//! SQL Expression Parser Library
+//!
+//! This library provides a parser for SQL boolean expressions following the
+//! grammar defined in SqlExprParser-EBNF-Final.ebnf
+//!
+//! The parser enforces type safety at the grammar level: all top-level expressions
+//! must evaluate to boolean values, while arithmetic and value expressions can only
+//! appear as operands to relational operators.
 
 pub mod ast;
 pub mod lexer;

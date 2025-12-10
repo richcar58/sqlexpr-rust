@@ -1,9 +1,9 @@
-// AST (Abstract Syntax Tree) definitions for SQL Expression Parser
-//
-// This module defines the AST structure that corresponds to the EBNF grammar.
-// The design enforces type safety at the grammar level: all top-level expressions
-// must be boolean, while arithmetic/value expressions can only appear as operands
-// to relational operators.
+//! AST (Abstract Syntax Tree) definitions for SQL Expression Parser
+//!
+//! This module defines the AST structure that corresponds to the EBNF grammar.
+//! The design enforces type safety at the grammar level: all top-level expressions
+//! must be boolean, while arithmetic/value expressions can only appear as operands
+//! to relational operators.
 
 use std::fmt;
 
