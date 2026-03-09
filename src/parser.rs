@@ -1052,11 +1052,11 @@ impl Parser {
 ///
 /// # Examples
 /// ```
-/// use sqlexpr_rust::parse;
+/// use sqlexpr_rust::{parse, BooleanExpr, ParseError};
 ///
 /// let result: Result<BooleanExpr, ParseError> = parse("x > 5 OR y < 10");
 /// assert!(result.is_ok());
-/// 
+///
 /// let result: Result<BooleanExpr, ParseError> = parse("name LIKE '%test%'");
 /// assert!(result.is_ok());
 /// ```
